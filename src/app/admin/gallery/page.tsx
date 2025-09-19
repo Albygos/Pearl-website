@@ -114,7 +114,7 @@ export default function ManageGalleryPage() {
             aiHint: aiHint,
         }
 
-        if (selectedUnitId) {
+        if (selectedUnitId && selectedUnitId !== 'none') {
             newImage.unitId = selectedUnitId;
         }
         
@@ -208,7 +208,7 @@ export default function ManageGalleryPage() {
                         <SelectValue placeholder="Select a unit" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {units.map(unit => (
                             <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>
                         ))}
