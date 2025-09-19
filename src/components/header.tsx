@@ -30,10 +30,12 @@ import {
   ImageIcon,
   ChevronDown,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/gallery', label: 'Gallery' },
+  { href: '/dashboard', label: 'My Dashboard' },
 ];
 
 const adminNavLinks = [
@@ -47,6 +49,20 @@ const adminNavLinks = [
 export default function Header() {
   const pathname = usePathname();
   const isAdminPage = pathname.startsWith('/admin');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsLoggedIn(!!localStorage.getItem('artfestlive_unit_id'));
+    }
+  }, [pathname]);
+
+  const handleSignOut = () => {
+    localStorage.removeItem('artfestlive_unit_id');
+    setIsLoggedIn(false);
+    //
+  };
+
 
   return (
     <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-40">
@@ -101,9 +117,18 @@ export default function Header() {
             </div>
           )}
 
-          <Button asChild>
-            <Link href="/login">Sign In</Link>
-          </Button>
+          {isLoggedIn ? (
+            <Button variant="outline" onClick={handleSignOut} asChild>
+              <Link href="/login">Sign Out</Link>
+            </Button>
+          ) : (
+             pathname !== '/login' && (
+              <Button asChild>
+                <Link href="/login">Sign In</Link>
+              </Button>
+            )
+          )}
+          
 
           <div className="md:hidden">
             <Sheet>

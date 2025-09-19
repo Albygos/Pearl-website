@@ -37,7 +37,7 @@ export default function LoginPage() {
       if (unit) {
         // In a real app, you'd set up a session. For this prototype, we'll use localStorage.
         localStorage.setItem('artfestlive_unit_id', unit.id);
-        router.push('/dashboard');
+        router.push('/gallery');
       } else {
         toast({
           title: 'Sign-in Failed',

@@ -1,12 +1,55 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { getGalleryImages } from '@/lib/services/gallery';
-import { unstable_noStore as noStore } from 'next/cache';
+import type { GalleryImage } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
+export default function GalleryPage() {
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-export default async function GalleryPage() {
-  noStore();
-  const galleryImages = await getGalleryImages();
+  useEffect(() => {
+    async function checkAuthAndLoadImages() {
+      const loggedInUnitId = localStorage.getItem('artfestlive_unit_id');
+      if (!loggedInUnitId) {
+        router.push('/login');
+        return;
+      }
+      
+      setLoading(true);
+      try {
+        const images = await getGalleryImages();
+        setGalleryImages(images);
+      } catch (error) {
+        console.error("Failed to load gallery images:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    checkAuthAndLoadImages();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <div className="text-center mb-12">
+          <Skeleton className="h-10 w-3/4 mx-auto mb-4" />
+          <Skeleton className="h-6 w-1/2 mx-auto" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+          {[...Array(10)].map((_, i) => (
+             <Card key={i}><CardContent className="p-0"><Skeleton className="aspect-[3/2] w-full" /></CardContent></Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8 px-4">
