@@ -25,7 +25,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogClose,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,8 +43,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+
+const getTotalScore = (unit: Unit) => {
+  if (!unit.events) return 0;
+  return unit.events.reduce((total, event) => total + event.score, 0);
+};
+
 
 export default function ManageUnitsPage() {
   const [units, setUnits] = useState<Unit[]>([]);
@@ -74,7 +78,7 @@ export default function ManageUnitsPage() {
 
   const handleAddUnit = async () => {
     if (newUnitName && newUnitTheme && newUnitCredentialId) {
-      const newUnit: Omit<Unit, 'id'> = {
+      const newUnit: Omit<Unit, 'id' | 'events'> & { score: number } = {
         name: newUnitName,
         theme: newUnitTheme,
         score: parseInt(newUnitScore, 10),
@@ -83,7 +87,10 @@ export default function ManageUnitsPage() {
       };
       try {
         const newUnitId = await addUnit(newUnit);
-        setUnits([...units, { ...newUnit, id: newUnitId }]);
+        const addedUnit = await getUnits().then(units => units.find(u => u.id === newUnitId));
+        if (addedUnit) {
+          setUnits([...units, addedUnit]);
+        }
         toast({
           title: 'Unit Added',
           description: `"${newUnitName}" has been added to the event.`,
@@ -142,7 +149,7 @@ export default function ManageUnitsPage() {
         title: 'Unit Deleted',
         description: 'The unit has been successfully removed.',
       });
-    } catch (error) => {
+    } catch (error) {
       toast({
         title: 'Error Deleting Unit',
         description: 'There was a problem deleting the unit.',
@@ -197,7 +204,7 @@ export default function ManageUnitsPage() {
                         </div>
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="score" className="text-right">Initial Score</Label>
+                        <Label htmlFor="score" className="text-right">Initial Score (Event 1)</Label>
                         <Input id="score" type="number" value={newUnitScore} onChange={(e) => setNewUnitScore(e.target.value)} className="col-span-3"/>
                     </div>
                 </div>
@@ -224,22 +231,22 @@ export default function ManageUnitsPage() {
                     <TableHead>Unit Name</TableHead>
                     <TableHead className="hidden md:table-cell">Theme</TableHead>
                     <TableHead className="hidden sm:table-cell">Credential ID</TableHead>
-                    <TableHead className="text-right">Score</TableHead>
+                    <TableHead className="text-right">Total Score</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {units.map((unit) => (
-                    <TableRow key={unit.id}>
+                    <TableRow key={unit.id} className="hover:bg-accent/50 transition-colors">
                       <TableCell className="font-medium truncate max-w-[150px] sm:max-w-xs">{unit.name}</TableCell>
                       <TableCell className="hidden md:table-cell truncate max-w-[150px] sm:max-w-xs">{unit.theme}</TableCell>
                       <TableCell className="hidden sm:table-cell font-mono text-xs">{unit.credentialId}</TableCell>
-                      <TableCell className="text-right font-bold">{unit.score}</TableCell>
+                      <TableCell className="text-right font-bold">{getTotalScore(unit)}</TableCell>
                       <TableCell className="text-right">
                          <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <Trash2 className="h-4 w-4 text-destructive" />
+                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
@@ -247,7 +254,7 @@ export default function ManageUnitsPage() {
                               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                               <AlertDialogDescription>
                                 This action cannot be undone. This will permanently delete the unit "{unit.name}".
-                              </AlertDialogDescription>
+                              </AndroidDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>

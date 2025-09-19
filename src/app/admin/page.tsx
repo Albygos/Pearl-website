@@ -11,6 +11,12 @@ import { Star, Users, ImageIcon, ArrowRight } from 'lucide-react';
 import { getUnits } from '@/lib/services/units';
 import { getGalleryImages } from '@/lib/services/gallery';
 import { unstable_noStore as noStore } from 'next/cache';
+import { Unit } from '@/lib/types';
+
+const getTotalScore = (unit: Unit) => {
+  if (!unit.events) return 0;
+  return unit.events.reduce((total, event) => total + event.score, 0);
+};
 
 export default async function AdminDashboardPage() {
   noStore();
@@ -19,17 +25,17 @@ export default async function AdminDashboardPage() {
 
   const totalUnits = units.length;
   const totalImages = galleryImages.length;
-  const topScoringUnit = totalUnits > 0 ? [...units].sort((a, b) => b.score - a.score)[0] : null;
+  const topScoringUnit = totalUnits > 0 ? [...units].sort((a, b) => getTotalScore(b) - getTotalScore(a))[0] : null;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-accent/50 min-h-full">
+    <div className="p-4 sm:p-6 lg:p-8 bg-background min-h-full">
       <header className="mb-8 max-w-7xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-headline font-bold">Admin Dashboard</h1>
         <p className="text-muted-foreground">Welcome, administrator. Here's a summary of ArtFestLive.</p>
       </header>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
-        <Card className="shadow-sm">
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Units
@@ -43,7 +49,7 @@ export default async function AdminDashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Top Scoring Unit
@@ -53,11 +59,11 @@ export default async function AdminDashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold truncate">{topScoringUnit?.name || 'N/A'}</div>
             <p className="text-xs text-muted-foreground">
-              {topScoringUnit ? `Currently leading with ${topScoringUnit.score} points` : 'No units available'}
+              {topScoringUnit ? `Currently leading with ${getTotalScore(topScoringUnit)} points` : 'No units available'}
             </p>
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Gallery Photos</CardTitle>
             <ImageIcon className="h-4 w-4 text-muted-foreground" />

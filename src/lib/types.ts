@@ -1,7 +1,12 @@
+export type EventScore = {
+  name: string;
+  score: number;
+}
+
 export type Unit = {
   id: string;
   name: string;
-  score: number;
+  events: EventScore[];
   theme: string;
   photoAccessCount: number;
   credentialId: string;

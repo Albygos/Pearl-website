@@ -45,11 +45,9 @@ export default function GalleryPage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {[...Array(8)].map((_, i) => (
-             <Card key={i} className="rounded-lg overflow-hidden">
-               <CardContent className="p-0">
-                  <Skeleton className="aspect-[4/3] w-full" />
-                </CardContent>
-             </Card>
+             <div key={i} className="aspect-w-1 aspect-h-1">
+                <Skeleton className="w-full h-full rounded-lg" />
+             </div>
           ))}
         </div>
       </div>
@@ -57,7 +55,7 @@ export default function GalleryPage() {
   }
 
   return (
-    <div className="bg-accent/50">
+    <div className="bg-background">
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-headline font-bold mb-4">Event Gallery</h1>
@@ -69,20 +67,19 @@ export default function GalleryPage() {
         {galleryImages.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
             {galleryImages.map((image) => (
-              <Card key={image.id} className="overflow-hidden group shadow-md hover:shadow-xl transition-shadow duration-300 border-none rounded-xl">
-                <CardContent className="p-0">
-                  <div className="aspect-w-4 aspect-h-3">
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      fill
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                      data-ai-hint={image.aiHint}
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              <div key={image.id} className="group relative aspect-w-1 aspect-h-1 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  className="object-cover w-full h-full transform transition-transform duration-300 group-hover:scale-110"
+                  data-ai-hint={image.aiHint}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                  <p className="text-white text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{image.alt}</p>
+                </div>
+              </div>
             ))}
           </div>
         ) : (

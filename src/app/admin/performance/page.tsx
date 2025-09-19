@@ -18,6 +18,11 @@ type LoadingStates = {
   [unitId: string]: boolean;
 };
 
+const getTotalScore = (unit: Unit) => {
+  if (!unit.events) return 0;
+  return unit.events.reduce((total, event) => total + event.score, 0);
+};
+
 export default function PerformancePage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +45,7 @@ export default function PerformancePage() {
     try {
       const result = await summarizeUnitPerformance({
         unitName: unit.name,
-        score: unit.score,
+        score: getTotalScore(unit),
         photoAccessCount: unit.photoAccessCount,
       });
       setSummaries(prev => ({ ...prev, [unit.id]: result.summary }));
@@ -90,7 +95,7 @@ export default function PerformancePage() {
         ) : (
       <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         {units.map(unit => (
-          <Card key={unit.id} className="flex flex-col">
+          <Card key={unit.id} className="flex flex-col hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart className="h-5 w-5 text-primary" />
@@ -102,9 +107,9 @@ export default function PerformancePage() {
               <div className="flex items-center justify-between text-sm border p-3 rounded-lg">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Star className="h-4 w-4" />
-                  <span>Score</span>
+                  <span>Total Score</span>
                 </div>
-                <span className="font-bold text-lg">{unit.score}</span>
+                <span className="font-bold text-lg">{getTotalScore(unit)}</span>
               </div>
               <div className="flex items-center justify-between text-sm border p-3 rounded-lg">
                 <div className="flex items-center gap-2 text-muted-foreground">
