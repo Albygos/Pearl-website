@@ -30,6 +30,7 @@ import {
   ImageIcon,
   ChevronDown,
   LogOut,
+  CalendarPlus,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -43,6 +44,7 @@ const navLinks = [
 
 const adminNavLinks = [
   { href: '/admin', label: 'Dashboard', icon: Shield },
+  { href: '/admin/events', label: 'Manage Events', icon: CalendarPlus },
   { href: '/admin/units', label: 'Manage Units', icon: Users },
   { href: '/admin/scores', label: 'Manage Scores', icon: Star },
   { href: '/admin/gallery', label: 'Manage Gallery', icon: ImageIcon },

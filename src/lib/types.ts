@@ -19,3 +19,8 @@ export type GalleryImage = {
   unitId?: string;
   aiHint: string;
 };
+
+export type AppEvent = {
+  id: string;
+  name: string;
+};

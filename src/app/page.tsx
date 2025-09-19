@@ -2,17 +2,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Crown, Trophy, Award } from 'lucide-react';
 import { getUnits } from '@/lib/services/units';
+import { getEvents } from '@/lib/services/events';
 import { unstable_noStore as noStore } from 'next/cache';
 import { Unit } from '@/lib/types';
 
 const getTotalScore = (unit: Unit) => {
+  if (!unit.events) return 0;
   return unit.events.reduce((total, event) => total + event.score, 0);
 };
 
 
 export default async function Home() {
   noStore();
-  const units = await getUnits();
+  const [units, events] = await Promise.all([getUnits(), getEvents()]);
   const sortedUnits = [...units].sort((a, b) => getTotalScore(b) - getTotalScore(a));
 
   const getRankIcon = (rank: number) => {
@@ -51,8 +53,9 @@ export default async function Home() {
                     <TableRow className="hover:bg-transparent text-xs uppercase tracking-wider">
                       <TableHead className="w-24 text-center">Rank</TableHead>
                       <TableHead>Unit Name</TableHead>
-                      <TableHead className="text-center">Event 1</TableHead>
-                      <TableHead className="text-center">Event 2</TableHead>
+                      {events.map(event => (
+                        <TableHead key={event.id} className="text-center">{event.name}</TableHead>
+                      ))}
                       <TableHead className="text-right text-base">Total Score</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -68,8 +71,11 @@ export default async function Home() {
                           </div>
                         </TableCell>
                         <TableCell>{unit.name}</TableCell>
-                        <TableCell className="text-center text-muted-foreground">{unit.events.find(e => e.name === "Event 1")?.score || 0}</TableCell>
-                        <TableCell className="text-center text-muted-foreground">{unit.events.find(e => e.name === "Event 2")?.score || 0}</TableCell>
+                        {events.map(event => (
+                          <TableCell key={event.id} className="text-center text-muted-foreground">
+                            {unit.events?.find(e => e.name === event.name)?.score ?? 0}
+                          </TableCell>
+                        ))}
                         <TableCell className="text-right text-primary text-xl font-bold">{getTotalScore(unit)}</TableCell>
                       </TableRow>
                     ))}

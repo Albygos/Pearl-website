@@ -58,7 +58,6 @@ export default function ManageUnitsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newUnitName, setNewUnitName] = useState('');
   const [newUnitTheme, setNewUnitTheme] = useState('');
-  const [newUnitScore, setNewUnitScore] = useState('0');
   const [newUnitCredentialId, setNewUnitCredentialId] = useState('');
   const [isSuggestingName, setIsSuggestingName] = useState(false);
   const { toast } = useToast();
@@ -79,11 +78,9 @@ export default function ManageUnitsPage() {
 
   const handleAddUnit = async () => {
     if (newUnitName && newUnitTheme && newUnitCredentialId) {
-      const newUnit: Omit<Unit, 'id' | 'events'> & { score: number } = {
+      const newUnit: Omit<Unit, 'id' | 'events' | 'photoAccessCount'> = {
         name: newUnitName,
         theme: newUnitTheme,
-        score: parseInt(newUnitScore, 10),
-        photoAccessCount: 0,
         credentialId: newUnitCredentialId,
       };
       try {
@@ -99,7 +96,6 @@ export default function ManageUnitsPage() {
         setIsAddDialogOpen(false);
         setNewUnitName('');
         setNewUnitTheme('');
-        setNewUnitScore('0');
         setNewUnitCredentialId('');
       } catch (error) {
         toast({
@@ -177,7 +173,7 @@ export default function ManageUnitsPage() {
                 <DialogHeader>
                     <DialogTitle>Add New Unit</DialogTitle>
                     <DialogDescription>
-                        Fill in the details for the new unit. A credential ID will be generated.
+                        Fill in the details for the new unit. It will be initialized with 0 points for all events.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -203,10 +199,6 @@ export default function ManageUnitsPage() {
                            <Input id="credentialId" value={newUnitCredentialId} onChange={(e) => setNewUnitCredentialId(e.target.value)} placeholder="Unique ID for login"/>
                            <Button variant="outline" size="sm" onClick={() => setNewUnitCredentialId(generateCredentialId())}>Generate</Button>
                         </div>
-                    </div>
-                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="score" className="text-right">Initial Score (Event 1)</Label>
-                        <Input id="score" type="number" value={newUnitScore} onChange={(e) => setNewUnitScore(e.target.value)} className="col-span-3"/>
                     </div>
                 </div>
                 <DialogFooter>
