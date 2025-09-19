@@ -135,19 +135,16 @@ const SidebarMenuButton = React.forwardRef<
       )}
     >
       {React.Children.map(children, (child) => {
-        if (React.isValidElement(child)) {
-          if (child.type === 'span') {
-            return null; // Don't render spans here
-          }
+        if (React.isValidElement(child) && child.type !== 'span') {
           return React.cloneElement(child as React.ReactElement, {
-            className: 'w-6 h-6',
+            className: 'w-6 h-6 shrink-0',
           });
         }
-        return child;
+        return null;
       })}
       <span
         className={cn(
-          "overflow-hidden transition-all",
+          "overflow-hidden transition-all whitespace-nowrap",
           expanded ? "w-52 ml-3" : "w-0"
         )}
       >
