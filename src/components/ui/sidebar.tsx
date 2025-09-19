@@ -6,6 +6,7 @@ import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface SidebarContextProps {
   expanded: boolean
@@ -23,7 +24,13 @@ function useSidebar() {
 }
 
 function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [expanded, setExpanded] = React.useState(true)
+  const isMobile = useIsMobile()
+  const [expanded, setExpanded] = React.useState(!isMobile)
+
+  React.useEffect(() => {
+    setExpanded(!isMobile)
+  }, [isMobile])
+
   return (
     <SidebarContext.Provider value={{ expanded, setExpanded }}>
       {children}
@@ -37,7 +44,7 @@ const Sidebar = React.forwardRef<
 >(({ className, side = "left", children, ...props }, ref) => {
   const { expanded } = useSidebar()
   return (
-    <aside ref={ref} className={cn("h-screen", className)} {...props}>
+    <aside ref={ref} className={cn("h-screen fixed top-0 z-50", side === "left" ? "left-0" : "right-0", expanded ? "w-64" : "w-20" , "transition-all", className)} {...props}>
       <nav className="h-full flex flex-col bg-card border-r shadow-sm">
         {children}
       </nav>
@@ -122,27 +129,36 @@ const SidebarMenuButton = React.forwardRef<
 
   const buttonContent = (
     <div
-      ref={ref}
       className={cn(
         "relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group hover:bg-secondary",
         className
       )}
-      {...props}
     >
-       {React.Children.map(children, child =>
-        React.isValidElement(child) && child.type !== 'span' ? React.cloneElement(child as React.ReactElement, { className: 'w-6 h-6' }) : null
-      )}
-      {expanded && (
-         <span className="flex-1 ml-3 whitespace-nowrap transition-all">
-          {React.Children.map(children, child =>
-            React.isValidElement(child) && child.type === 'span' ? child : null
-          )}
-        </span>
-      )}
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+          if (child.type === 'span') {
+            return null; // Don't render spans here
+          }
+          return React.cloneElement(child as React.ReactElement, {
+            className: 'w-6 h-6',
+          });
+        }
+        return child;
+      })}
+      <span
+        className={cn(
+          "overflow-hidden transition-all",
+          expanded ? "w-52 ml-3" : "w-0"
+        )}
+      >
+         {React.Children.map(children, (child) =>
+          React.isValidElement(child) && child.type === 'span' ? child : null
+        )}
+      </span>
     </div>
   );
   
-  const childEl = asChild ? <div>{buttonContent}</div> : <a>{buttonContent}</a>;
+  const childEl = asChild ? <div {...props} ref={ref as any}>{buttonContent}</div> : <a {...props} ref={ref}>{buttonContent}</a>
 
   if (!expanded && tooltip) {
     return (
@@ -197,18 +213,19 @@ const SidebarInset = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
   const { expanded } = useSidebar()
+  const isMobile = useIsMobile()
   return (
-    <div
+    <main
       ref={ref}
       className={cn(
         "transition-all",
-        expanded ? "md:ml-64" : "md:ml-20",
+        !isMobile && (expanded ? "ml-64" : "ml-20"),
         className
       )}
       {...props}
     >
       {children}
-    </div>
+    </main>
   )
 })
 SidebarInset.displayName = "SidebarInset"

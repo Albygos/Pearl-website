@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarProvider,
   SidebarInset,
-} from "@/components/sidebar";
+} from "@/components/ui/sidebar";
 import Logo from "@/components/logo";
 
 export default function AdminLayout({
