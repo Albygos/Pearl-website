@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-12rem)] py-12">
+    <div className="flex items-center justify-center min-h-[calc(100vh-12rem)] py-12 px-4">
       <Card className="mx-auto max-w-sm w-full shadow-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-headline">Unit Sign-in</CardTitle>

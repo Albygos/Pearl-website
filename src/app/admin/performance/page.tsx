@@ -59,7 +59,7 @@ export default function PerformancePage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <header className="mb-8">
-        <h1 className="text-4xl font-headline font-bold">Unit Performance</h1>
+        <h1 className="text-3xl md:text-4xl font-headline font-bold">Unit Performance</h1>
         <p className="text-muted-foreground">
           Generate AI-powered performance summaries for each unit.
         </p>
@@ -88,7 +88,7 @@ export default function PerformancePage() {
             ))}
           </div>
         ) : (
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         {units.map(unit => (
           <Card key={unit.id} className="flex flex-col">
             <CardHeader>

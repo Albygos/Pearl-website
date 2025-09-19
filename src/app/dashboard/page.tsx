@@ -27,7 +27,7 @@ export default async function DashboardPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-headline font-bold mb-4">
+        <h1 className="text-3xl md:text-5xl font-headline font-bold mb-4">
           Welcome, {loggedInUnit.name}!
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -36,7 +36,7 @@ export default async function DashboardPage() {
       </div>
 
       {unitImages.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
           {unitImages.map((image) => (
             <Card key={image.id} className="overflow-hidden group shadow-lg hover:shadow-2xl transition-shadow duration-300">
               <CardContent className="p-0">

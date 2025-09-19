@@ -117,9 +117,9 @@ export default function ManageUnitsPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <header className="flex justify-between items-start mb-8">
+      <header className="flex flex-col sm:flex-row justify-between sm:items-start mb-8 gap-4">
         <div>
-          <h1 className="text-4xl font-headline font-bold">Manage Units</h1>
+          <h1 className="text-3xl md:text-4xl font-headline font-bold">Manage Units</h1>
           <p className="text-muted-foreground">Add or edit participating units.</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -149,7 +149,7 @@ export default function ManageUnitsPage() {
                         <div className="col-start-2 col-span-3">
                             <Button variant="outline" size="sm" onClick={handleSuggestName} disabled={isSuggestingName}>
                                 {isSuggestingName ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                                Suggest Name with AI
+                                Suggest Name
                             </Button>
                         </div>
                     </div>
@@ -174,24 +174,26 @@ export default function ManageUnitsPage() {
                 <Skeleton className="h-12 w-full" />
              </div>
           ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Unit Name</TableHead>
-                <TableHead>Theme</TableHead>
-                <TableHead className="text-right">Score</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {units.map((unit) => (
-                <TableRow key={unit.id}>
-                  <TableCell className="font-medium">{unit.name}</TableCell>
-                  <TableCell>{unit.theme}</TableCell>
-                  <TableCell className="text-right font-bold">{unit.score}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Unit Name</TableHead>
+                    <TableHead className="hidden sm:table-cell">Theme</TableHead>
+                    <TableHead className="text-right">Score</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {units.map((unit) => (
+                    <TableRow key={unit.id}>
+                      <TableCell className="font-medium truncate max-w-xs">{unit.name}</TableCell>
+                      <TableCell className="hidden sm:table-cell truncate max-w-xs">{unit.theme}</TableCell>
+                      <TableCell className="text-right font-bold">{unit.score}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>

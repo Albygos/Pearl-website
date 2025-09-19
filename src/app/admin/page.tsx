@@ -24,7 +24,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <header className="mb-8">
-        <h1 className="text-4xl font-headline font-bold">Admin Dashboard</h1>
+        <h1 className="text-3xl md:text-4xl font-headline font-bold">Admin Dashboard</h1>
         <p className="text-muted-foreground">Welcome, administrator. Here's a summary of ArtFestLive.</p>
       </header>
 
@@ -51,7 +51,7 @@ export default async function AdminDashboardPage() {
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{topScoringUnit?.name || 'N/A'}</div>
+            <div className="text-2xl font-bold truncate">{topScoringUnit?.name || 'N/A'}</div>
             <p className="text-xs text-muted-foreground">
               {topScoringUnit ? `Currently leading with ${topScoringUnit.score} points` : 'No units available'}
             </p>

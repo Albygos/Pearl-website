@@ -86,7 +86,7 @@ export default function ManageScoresPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <header className="mb-8">
-        <h1 className="text-4xl font-headline font-bold">Manage Scores</h1>
+        <h1 className="text-3xl md:text-4xl font-headline font-bold">Manage Scores</h1>
         <p className="text-muted-foreground">Update scores for participating units.</p>
       </header>
       <Card>
@@ -98,28 +98,30 @@ export default function ManageScoresPage() {
                 <Skeleton className="h-12 w-full" />
              </div>
           ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Unit Name</TableHead>
-                <TableHead className="text-right w-32">Current Score</TableHead>
-                <TableHead className="text-right w-32">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {units.map((unit) => (
-                <TableRow key={unit.id}>
-                  <TableCell className="font-medium">{unit.name}</TableCell>
-                  <TableCell className="text-right font-bold">{unit.score}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="outline" size="sm" onClick={() => handleEditClick(unit)}>
-                      Edit Score
-                    </Button>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Unit Name</TableHead>
+                  <TableHead className="text-right w-[100px] sm:w-32">Current Score</TableHead>
+                  <TableHead className="text-right w-[80px] sm:w-32">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {units.map((unit) => (
+                  <TableRow key={unit.id}>
+                    <TableCell className="font-medium truncate max-w-xs">{unit.name}</TableCell>
+                    <TableCell className="text-right font-bold">{unit.score}</TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" onClick={() => handleEditClick(unit)}>
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
           )}
         </CardContent>
       </Card>

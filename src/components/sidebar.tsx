@@ -6,6 +6,7 @@ import { MoreVertical, ChevronLast, ChevronFirst } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface SidebarContextProps {
   expanded: boolean
@@ -23,7 +24,13 @@ function useSidebar() {
 }
 
 function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [expanded, setExpanded] = React.useState(true)
+  const isMobile = useIsMobile()
+  const [expanded, setExpanded] = React.useState(!isMobile)
+
+  React.useEffect(() => {
+    setExpanded(!isMobile)
+  }, [isMobile])
+
   return (
     <SidebarContext.Provider value={{ expanded, setExpanded }}>
       {children}
@@ -37,7 +44,7 @@ const Sidebar = React.forwardRef<
 >(({ className, side = "left", children, ...props }, ref) => {
   const { expanded } = useSidebar()
   return (
-    <aside ref={ref} className={cn("h-screen fixed top-0", side === "left" ? "left-0" : "right-0", expanded ? "w-64" : "w-20" , "transition-all", className)} {...props}>
+    <aside ref={ref} className={cn("h-screen fixed top-0 z-50", side === "left" ? "left-0" : "right-0", expanded ? "w-64" : "w-20" , "transition-all", className)} {...props}>
       <nav className="h-full flex flex-col bg-card border-r shadow-sm">
         {children}
       </nav>
@@ -198,17 +205,18 @@ const SidebarInset = React.forwardRef<
 >(({ className, children, ...props }, ref) => {
   const { expanded } = useSidebar()
   return (
-    <div
+    <main
       ref={ref}
       className={cn(
         "transition-all",
-        expanded ? "ml-64" : "ml-20",
+        "md:ml-20",
+        expanded && "md:ml-64",
         className
       )}
       {...props}
     >
       {children}
-    </div>
+    </main>
   )
 })
 SidebarInset.displayName = "SidebarInset"

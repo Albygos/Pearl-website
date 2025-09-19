@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Home, Shield, Star, Users, BarChart } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -22,7 +21,7 @@ export default function AdminLayout({
   return (
     <SidebarProvider>
       <div className="flex min-h-screen">
-        <Sidebar className="border-r" side="left">
+        <Sidebar className="border-r hidden md:flex" side="left">
           <SidebarHeader>
             <Logo />
           </SidebarHeader>
