@@ -7,7 +7,7 @@ export default function AdminLayout({
 }) {
   return (
     <AdminAuthGuard>
-      <div className="bg-background">{children}</div>
+      <div className="bg-background min-h-[calc(100vh-10rem)]">{children}</div>
     </AdminAuthGuard>
   );
 }

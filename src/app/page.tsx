@@ -12,56 +12,64 @@ export default async function Home() {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />;
+        return <Crown className="w-6 h-6 text-yellow-500" />;
       case 2:
-        return <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />;
+        return <Trophy className="w-6 h-6 text-slate-500" />;
       case 3:
-        return <Award className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />;
+        return <Award className="w-6 h-6 text-orange-500" />;
       default:
-        return <span className="text-base sm:text-lg font-bold">{rank}</span>;
+        return <span className="text-lg font-bold text-muted-foreground">{rank}</span>;
     }
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <section className="text-center mb-12">
-        <h1 className="text-4xl sm:text-5xl md:text-7xl font-headline font-bold mb-4 tracking-tighter">ArtFestLive</h1>
+    <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <section className="text-center mb-16">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-headline font-bold mb-4 tracking-tight">ArtFestLive</h1>
         <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
           Welcome to the heart of creativity! Witness the scores unfold in real-time and celebrate the spirit of art.
         </p>
       </section>
 
-      <Card className="shadow-2xl">
-        <CardHeader>
-          <CardTitle className="text-2xl sm:text-3xl font-headline text-center">Live Scoreboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-16 sm:w-24 text-center">Rank</TableHead>
-                  <TableHead>Unit Name</TableHead>
-                  <TableHead className="text-right">Score</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedUnits.map((unit, index) => (
-                  <TableRow key={unit.id} className="text-base sm:text-lg">
-                    <TableCell className="font-bold text-center">
-                      <div className="flex items-center justify-center">
-                        {getRankIcon(index + 1)}
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium truncate max-w-xs">{unit.name}</TableCell>
-                    <TableCell className="text-right font-bold text-primary">{unit.score}</TableCell>
+      <div className="max-w-4xl mx-auto">
+        <Card className="shadow-lg border-none">
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl font-headline">Live Scoreboard</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="w-24 text-center">Rank</TableHead>
+                    <TableHead>Unit Name</TableHead>
+                    <TableHead className="text-right">Score</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {sortedUnits.map((unit, index) => (
+                    <TableRow key={unit.id} className="text-lg hover:bg-accent transition-colors duration-200">
+                      <TableCell className="font-bold text-center">
+                        <div className="flex items-center justify-center h-full">
+                          {getRankIcon(index + 1)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">{unit.name}</TableCell>
+                      <TableCell className="text-right font-bold text-primary text-xl">{unit.score}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+               {!sortedUnits.length && (
+                <div className="text-center py-16 text-muted-foreground">
+                  <p>The scoreboard is currently empty.</p>
+                  <p>Check back soon for live updates!</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

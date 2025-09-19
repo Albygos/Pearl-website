@@ -36,8 +36,6 @@ export default function AdminLoginPage() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // On successful login, the auth state change will be detected
-      // by the AdminAuthGuard and redirect to the dashboard.
       router.push('/admin');
     } catch (error) {
       toast({
@@ -51,8 +49,8 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-12rem)] py-12 px-4">
-      <Card className="mx-auto max-w-sm w-full shadow-xl">
+    <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4 bg-accent/50">
+      <Card className="mx-auto max-w-sm w-full shadow-lg border-none">
         <CardHeader>
           <CardTitle className="text-2xl font-headline">Admin Sign-in</CardTitle>
           <CardDescription>
@@ -83,7 +81,7 @@ export default function AdminLoginPage() {
                 onKeyDown={(e) => e.key === 'Enter' && handleSignIn()}
               />
             </div>
-            <Button onClick={handleSignIn} disabled={loading} className="w-full">
+            <Button onClick={handleSignIn} disabled={loading} className="w-full mt-2">
               {loading && <Loader className="animate-spin mr-2" />}
               Sign in
             </Button>

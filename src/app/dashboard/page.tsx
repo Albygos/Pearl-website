@@ -33,19 +33,16 @@ export default function DashboardPage() {
 
         if (fetchedUnit) {
           setUnit(fetchedUnit);
-          const imagesForUnit = allImages.filter(img => img.unitId === fetchedUnit.id);
+          const imagesForUnit = allImages.filter(img => img.unitId === fetchedUnit.id).reverse();
           setUnitImages(imagesForUnit);
-          // Increment photo access count when the dashboard is loaded
           if (imagesForUnit.length > 0) {
-            await incrementUnitPhotoAccessCount(loggedInUnitId);
+            incrementUnitPhotoAccessCount(loggedInUnitId);
           }
         } else {
-          // If unit not found, clear storage and redirect
           handleSignOut();
         }
       } catch (error) {
         console.error("Failed to load dashboard:", error);
-        // Potentially handle this with a toast message
         handleSignOut();
       } finally {
         setLoading(false);
@@ -62,63 +59,74 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="text-center mb-12">
-          <Skeleton className="h-10 w-3/4 mx-auto mb-4" />
-          <Skeleton className="h-6 w-1/2 mx-auto" />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-          {[...Array(10)].map((_, i) => (
-             <Card key={i}><CardContent className="p-0"><Skeleton className="aspect-[3/2] w-full" /></CardContent></Card>
-          ))}
+       <div className="bg-accent/50">
+        <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center text-center sm:text-left mb-12 gap-4">
+              <div>
+                <Skeleton className="h-10 w-64 mx-auto sm:mx-0 mb-4" />
+                <Skeleton className="h-6 w-80 mx-auto sm:mx-0" />
+              </div>
+              <Skeleton className="h-10 w-24 mx-auto sm:mx-0" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+            {[...Array(4)].map((_, i) => (
+              <Card key={i} className="rounded-xl overflow-hidden">
+                <CardContent className="p-0">
+                    <Skeleton className="aspect-[4/3] w-full" />
+                  </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   if (!unit) {
-    return null; // Should be redirected, but as a fallback.
+    return null;
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center text-center sm:text-left mb-12 gap-4">
-        <div>
-          <h1 className="text-3xl md:text-5xl font-headline font-bold mb-2">
-            Welcome, {unit.name}!
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto sm:mx-0">
-            Here are the photos captured of your amazing work.
-          </p>
+    <div className="bg-accent/50 min-h-full">
+      <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center text-center sm:text-left mb-12 gap-4">
+          <div>
+            <h1 className="text-3xl md:text-5xl font-headline font-bold mb-2">
+              Welcome, {unit.name}!
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto sm:mx-0">
+              Here are the photos captured of your amazing work.
+            </p>
+          </div>
+          <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>
         </div>
-        <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>
-      </div>
 
-      {unitImages.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-          {unitImages.map((image) => (
-            <Card key={image.id} className="overflow-hidden group shadow-lg hover:shadow-2xl transition-shadow duration-300">
-              <CardContent className="p-0">
-                <div className="aspect-w-3 aspect-h-2">
-                   <Image
-                    src={image.src}
-                    alt={image.alt}
-                    width={600}
-                    height={400}
-                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                    data-ai-hint={image.aiHint}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-16 border-2 border-dashed rounded-lg">
-          <p className="text-muted-foreground text-lg">No photos have been assigned to your unit yet.</p>
-          <p className="text-sm text-muted-foreground mt-2">Check back soon!</p>
-        </div>
-      )}
+        {unitImages.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+            {unitImages.map((image) => (
+               <Card key={image.id} className="overflow-hidden group shadow-md hover:shadow-xl transition-shadow duration-300 border-none rounded-xl">
+                <CardContent className="p-0">
+                  <div className="aspect-w-4 aspect-h-3">
+                     <Image
+                      src={image.src}
+                      alt={image.alt}
+                      fill
+                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      data-ai-hint={image.aiHint}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-24 border-2 border-dashed rounded-lg mt-16">
+            <p className="text-muted-foreground text-xl">No photos have been assigned to your unit yet.</p>
+            <p className="text-md text-muted-foreground mt-2">Check back soon!</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

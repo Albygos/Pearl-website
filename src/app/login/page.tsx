@@ -35,7 +35,6 @@ export default function LoginPage() {
     try {
       const unit = await getUnitByCredential(credentialId.trim());
       if (unit) {
-        // In a real app, you'd set up a session. For this prototype, we'll use localStorage.
         localStorage.setItem('artfestlive_unit_id', unit.id);
         router.push('/gallery');
       } else {
@@ -58,12 +57,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-12rem)] py-12 px-4">
-      <Card className="mx-auto max-w-sm w-full shadow-xl">
+    <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4 bg-accent/50">
+      <Card className="mx-auto max-w-sm w-full shadow-lg border-none">
         <CardHeader>
           <CardTitle className="text-2xl font-headline">Unit Sign-in</CardTitle>
           <CardDescription>
-            Enter your credential to access your unit's dashboard.
+            Enter your credential to access your unit's gallery.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -73,14 +72,14 @@ export default function LoginPage() {
               <Input
                 id="credentialId"
                 type="text"
-                placeholder="your-unique-credential-id"
+                placeholder="Enter your unique ID"
                 value={credentialId}
                 onChange={(e) => setCredentialId(e.target.value)}
                 required
                 onKeyDown={(e) => e.key === 'Enter' && handleSignIn()}
               />
             </div>
-            <Button onClick={handleSignIn} disabled={loading} className="w-full">
+            <Button onClick={handleSignIn} disabled={loading} className="w-full mt-2">
               {loading && <Loader className="animate-spin mr-2" />}
               Sign in
             </Button>

@@ -79,22 +79,23 @@ export default function Header() {
 
 
   return (
-    <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-40">
+    <header className="bg-background/80 backdrop-blur-sm border-b sticky top-0 z-40">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Logo />
 
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'text-sm font-medium transition-colors hover:text-primary',
-                pathname === link.href ? 'text-primary' : 'text-muted-foreground'
-              )}
-            >
-              {link.label}
-            </Link>
+            <Button key={link.href} variant="ghost" asChild className={cn(pathname === link.href && 'font-bold')}>
+              <Link
+                href={link.href}
+                className={cn(
+                  'text-sm transition-colors',
+                   pathname === link.href ? 'text-primary' : 'text-muted-foreground'
+                )}
+              >
+                {link.label}
+              </Link>
+            </Button>
           ))}
         </nav>
 
@@ -108,7 +109,7 @@ export default function Header() {
                     <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
+                <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Admin Navigation</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {adminNavLinks.map((link) => (
@@ -150,7 +151,7 @@ export default function Header() {
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon">
-                  <Menu className="h-4 w-4" />
+                  <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right">
@@ -169,7 +170,7 @@ export default function Header() {
                             key={link.href}
                             href={link.href}
                             className={cn(
-                              'text-lg font-medium flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-secondary text-muted-foreground'
+                              'text-lg font-medium flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-accent'
                             )}
                           >
                             {link.label}
@@ -184,10 +185,10 @@ export default function Header() {
                               key={link.href}
                               href={link.href}
                               className={cn(
-                                'text-lg font-medium flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-secondary',
+                                'text-lg font-medium flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-accent',
                                 pathname === link.href
-                                  ? 'bg-secondary text-primary'
-                                  : 'text-muted-foreground'
+                                  ? 'bg-accent text-primary'
+                                  : ''
                               )}
                             >
                               <link.icon className="h-5 w-5" />
@@ -207,7 +208,7 @@ export default function Header() {
                               'text-lg font-medium transition-colors hover:text-primary',
                               pathname === link.href
                                 ? 'text-primary'
-                                : 'text-muted-foreground'
+                                : ''
                             )}
                           >
                             {link.label}
