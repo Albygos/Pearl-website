@@ -142,7 +142,7 @@ export default function ManageUnitsPage() {
         title: 'Unit Deleted',
         description: 'The unit has been successfully removed.',
       });
-    } catch (error) {
+    } catch (error) => {
       toast({
         title: 'Error Deleting Unit',
         description: 'There was a problem deleting the unit.',

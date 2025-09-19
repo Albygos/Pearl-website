@@ -12,11 +12,11 @@ export default async function Home() {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />;
+        return <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />;
       case 2:
-        return <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" />;
+        return <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-slate-400" />;
       case 3:
-        return <Award className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-700" />;
+        return <Award className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />;
       default:
         return <span className="text-base sm:text-lg font-bold">{rank}</span>;
     }
