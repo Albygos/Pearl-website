@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home, Shield, Star, Users, BarChart } from "lucide-react";
+import { Home, Shield, Star, Users, BarChart, ImageIcon } from "lucide-react";
 
 import {
   Sidebar,
@@ -36,6 +36,14 @@ export default function AdminLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Manage Units">
+                  <Link href="/admin/units">
+                    <Users />
+                    <span>Manage Units</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Manage Scores">
                   <Link href="/admin/scores">
                     <Star />
@@ -44,10 +52,10 @@ export default function AdminLayout({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Manage Units">
-                  <Link href="/admin/units">
-                    <Users />
-                    <span>Manage Units</span>
+                <SidebarMenuButton asChild tooltip="Manage Gallery">
+                  <Link href="/admin/gallery">
+                    <ImageIcon />
+                    <span>Manage Gallery</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

@@ -4,6 +4,7 @@ export type Unit = {
   score: number;
   theme: string;
   photoAccessCount: number;
+  credentialId: string;
 };
 
 export type GalleryImage = {

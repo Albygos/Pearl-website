@@ -1,5 +1,5 @@
 import { database } from '@/lib/firebase';
-import { ref, get, set, child } from 'firebase/database';
+import { ref, get, set, child, push, remove } from 'firebase/database';
 import type { Unit } from '@/lib/types';
 
 const dbRef = ref(database);
@@ -38,6 +38,24 @@ export async function getUnit(id: string): Promise<Unit | null> {
     }
 }
 
+export async function getUnitByCredential(credentialId: string): Promise<Unit | null> {
+    try {
+        const snapshot = await get(child(dbRef, 'units'));
+        if (snapshot.exists()) {
+            const unitsData = snapshot.val();
+            const unitId = Object.keys(unitsData).find(key => unitsData[key].credentialId === credentialId);
+            if (unitId) {
+                return { id: unitId, ...unitsData[unitId] };
+            }
+        }
+        return null;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+
 export async function updateUnitScore(id: string, newScore: number): Promise<void> {
     try {
         const unitRef = child(dbRef, `units/${id}/score`);
@@ -51,7 +69,7 @@ export async function updateUnitScore(id: string, newScore: number): Promise<voi
 export async function addUnit(unit: Omit<Unit, 'id'>): Promise<string> {
     try {
         const newUnitRef = child(ref(database), 'units');
-        const newUnitKey = (await import('firebase/database')).push(newUnitRef).key;
+        const newUnitKey = push(newUnitRef).key;
         if (!newUnitKey) throw new Error("Failed to generate a new key for the unit");
 
         const unitRef = child(dbRef, `units/${newUnitKey}`);
@@ -59,6 +77,16 @@ export async function addUnit(unit: Omit<Unit, 'id'>): Promise<string> {
         return newUnitKey;
     } catch (error) {
         console.error("Error adding unit:", error);
+        throw error;
+    }
+}
+
+export async function deleteUnit(id: string): Promise<void> {
+    try {
+        const unitRef = child(dbRef, `units/${id}`);
+        await remove(unitRef);
+    } catch (error) {
+        console.error("Error deleting unit:", error);
         throw error;
     }
 }

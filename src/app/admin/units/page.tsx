@@ -25,15 +25,27 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { getUnits, addUnit } from '@/lib/services/units';
+import { getUnits, addUnit, deleteUnit } from '@/lib/services/units';
 import type { Unit } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Loader, Wand2, Plus } from 'lucide-react';
+import { Loader, Wand2, Plus, Trash2 } from 'lucide-react';
 import { suggestUnitName } from '@/ai/flows/suggest-unit-name';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function ManageUnitsPage() {
   const [units, setUnits] = useState<Unit[]>([]);
@@ -42,6 +54,7 @@ export default function ManageUnitsPage() {
   const [newUnitName, setNewUnitName] = useState('');
   const [newUnitTheme, setNewUnitTheme] = useState('');
   const [newUnitScore, setNewUnitScore] = useState('0');
+  const [newUnitCredentialId, setNewUnitCredentialId] = useState('');
   const [isSuggestingName, setIsSuggestingName] = useState(false);
   const { toast } = useToast();
 
@@ -54,14 +67,19 @@ export default function ManageUnitsPage() {
     }
     fetchUnits();
   }, []);
+  
+  const generateCredentialId = () => {
+    return Math.random().toString(36).substring(2, 10).toUpperCase();
+  }
 
   const handleAddUnit = async () => {
-    if (newUnitName && newUnitTheme) {
+    if (newUnitName && newUnitTheme && newUnitCredentialId) {
       const newUnit: Omit<Unit, 'id'> = {
         name: newUnitName,
         theme: newUnitTheme,
         score: parseInt(newUnitScore, 10),
         photoAccessCount: 0,
+        credentialId: newUnitCredentialId,
       };
       try {
         const newUnitId = await addUnit(newUnit);
@@ -74,6 +92,7 @@ export default function ManageUnitsPage() {
         setNewUnitName('');
         setNewUnitTheme('');
         setNewUnitScore('0');
+        setNewUnitCredentialId('');
       } catch (error) {
         toast({
             title: 'Error Adding Unit',
@@ -84,7 +103,7 @@ export default function ManageUnitsPage() {
     } else {
         toast({
             title: 'Missing Information',
-            description: `Please provide a name and theme for the new unit.`,
+            description: `Please provide a name, theme, and credential ID.`,
             variant: 'destructive'
         });
     }
@@ -94,7 +113,7 @@ export default function ManageUnitsPage() {
     if (!newUnitTheme) {
       toast({
         title: 'Theme Required',
-        description: 'Please enter an event theme to suggest a name.',
+        description: 'Please enter a theme to suggest a name.',
         variant: 'destructive',
       });
       return;
@@ -115,12 +134,29 @@ export default function ManageUnitsPage() {
     }
   };
 
+  const handleDeleteUnit = async (unitId: string) => {
+    try {
+      await deleteUnit(unitId);
+      setUnits(units.filter(u => u.id !== unitId));
+      toast({
+        title: 'Unit Deleted',
+        description: 'The unit has been successfully removed.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error Deleting Unit',
+        description: 'There was a problem deleting the unit.',
+        variant: 'destructive'
+      });
+    }
+  };
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <header className="flex flex-col sm:flex-row justify-between sm:items-start mb-8 gap-4">
         <div>
           <h1 className="text-3xl md:text-4xl font-headline font-bold">Manage Units</h1>
-          <p className="text-muted-foreground">Add or edit participating units.</p>
+          <p className="text-muted-foreground">Add, edit, or delete participating units.</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
@@ -133,7 +169,7 @@ export default function ManageUnitsPage() {
                 <DialogHeader>
                     <DialogTitle>Add New Unit</DialogTitle>
                     <DialogDescription>
-                        Fill in the details for the new participating unit.
+                        Fill in the details for the new unit. A credential ID will be generated.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -151,6 +187,13 @@ export default function ManageUnitsPage() {
                                 {isSuggestingName ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
                                 Suggest Name
                             </Button>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="credentialId" className="text-right">Credential ID</Label>
+                        <div className="col-span-3 flex items-center gap-2">
+                           <Input id="credentialId" value={newUnitCredentialId} onChange={(e) => setNewUnitCredentialId(e.target.value)} placeholder="Unique ID for login"/>
+                           <Button variant="outline" size="sm" onClick={() => setNewUnitCredentialId(generateCredentialId())}>Generate</Button>
                         </div>
                     </div>
                      <div className="grid grid-cols-4 items-center gap-4">
@@ -179,16 +222,40 @@ export default function ManageUnitsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Unit Name</TableHead>
-                    <TableHead className="hidden sm:table-cell">Theme</TableHead>
+                    <TableHead className="hidden md:table-cell">Theme</TableHead>
+                    <TableHead className="hidden sm:table-cell">Credential ID</TableHead>
                     <TableHead className="text-right">Score</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {units.map((unit) => (
                     <TableRow key={unit.id}>
-                      <TableCell className="font-medium truncate max-w-xs">{unit.name}</TableCell>
-                      <TableCell className="hidden sm:table-cell truncate max-w-xs">{unit.theme}</TableCell>
+                      <TableCell className="font-medium truncate max-w-[150px] sm:max-w-xs">{unit.name}</TableCell>
+                      <TableCell className="hidden md:table-cell truncate max-w-[150px] sm:max-w-xs">{unit.theme}</TableCell>
+                      <TableCell className="hidden sm:table-cell font-mono text-xs">{unit.credentialId}</TableCell>
                       <TableCell className="text-right font-bold">{unit.score}</TableCell>
+                      <TableCell className="text-right">
+                         <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the unit "{unit.name}".
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteUnit(unit.id)}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

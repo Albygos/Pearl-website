@@ -1,4 +1,7 @@
-import Link from 'next/link';
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,36 +12,77 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getUnitByCredential } from '@/lib/services/units';
+import { useToast } from '@/hooks/use-toast';
+import { Loader } from 'lucide-react';
 
 export default function LoginPage() {
+  const [credentialId, setCredentialId] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleSignIn = async () => {
+    if (!credentialId) {
+      toast({
+        title: 'Credential ID Required',
+        description: 'Please enter your credential ID to sign in.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setLoading(true);
+    try {
+      const unit = await getUnitByCredential(credentialId.trim());
+      if (unit) {
+        // In a real app, you'd set up a session. For this prototype, we'll use localStorage.
+        localStorage.setItem('artfestlive_unit_id', unit.id);
+        router.push('/dashboard');
+      } else {
+        toast({
+          title: 'Sign-in Failed',
+          description: 'Invalid Credential ID. Please check and try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: 'Sign-in Error',
+        description: 'An unexpected error occurred. Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-12rem)] py-12 px-4">
       <Card className="mx-auto max-w-sm w-full shadow-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-headline">Unit Sign-in</CardTitle>
           <CardDescription>
-            Enter your credentials to access your unit's dashboard.
+            Enter your credential to access your unit's dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Credential ID</Label>
+              <Label htmlFor="credentialId">Credential ID</Label>
               <Input
-                id="email"
+                id="credentialId"
                 type="text"
-                placeholder="unit-credential-id"
+                placeholder="your-unique-credential-id"
+                value={credentialId}
+                onChange={(e) => setCredentialId(e.target.value)}
                 required
+                onKeyDown={(e) => e.key === 'Enter' && handleSignIn()}
               />
             </div>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
-              </div>
-              <Input id="password" type="password" placeholder="••••••••" required />
-            </div>
-            <Button type="submit" className="w-full" asChild>
-              <Link href="/dashboard">Sign in</Link>
+            <Button onClick={handleSignIn} disabled={loading} className="w-full">
+              {loading && <Loader className="animate-spin mr-2" />}
+              Sign in
             </Button>
           </div>
         </CardContent>
