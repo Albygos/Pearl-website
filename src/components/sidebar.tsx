@@ -130,11 +130,13 @@ const SidebarMenuButton = React.forwardRef<
       {...props}
     >
       {React.Children.map(children, child =>
-        React.isValidElement(child) ? React.cloneElement(child, { className: 'w-6 h-6' }) : child
+        React.isValidElement(child) && child.type !== 'span' ? React.cloneElement(child as React.ReactElement, { className: 'w-6 h-6' }) : null
       )}
       {expanded && (
         <div className="flex-1 ml-3 whitespace-nowrap transition-all">
-          {(children as any)?.props?.children?.find((child: any) => typeof child === 'string' || child.type === 'span')}
+          {React.Children.map(children, child =>
+            React.isValidElement(child) && child.type === 'span' ? child : null
+          )}
         </div>
       )}
     </div>
