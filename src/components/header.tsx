@@ -94,7 +94,7 @@ const MobileMainNav = ({ isUnitLoggedIn, pathname }: { isUnitLoggedIn: boolean, 
 const adminNavLinks = [
   { href: '/admin', label: 'Dashboard', icon: Shield },
   { href: '/admin/events', label: 'Manage Events', icon: CalendarPlus },
-  { href: '/admin/units', label: 'Manage Units', icon: Users },
+  { href: '/admin/units', label: 'Manage Megalas', icon: Users },
   { href: '/admin/scores', label: 'Manage Scores', icon: Star },
   { href: '/admin/gallery', label: 'Manage Gallery', icon: ImageIcon },
   { href: '/admin/performance', label: 'Performance', icon: BarChart },
@@ -190,7 +190,7 @@ export default function Header() {
           ) : (
              pathname !== '/login' && !pathname.startsWith('/admin') && (
               <Button asChild>
-                <Link href="/login">Unit Sign In</Link>
+                <Link href="/login">Megala Sign In</Link>
               </Button>
             )
           )}

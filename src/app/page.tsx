@@ -79,7 +79,7 @@ export default function Home() {
                  <div className="relative w-full sm:max-w-xs">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
-                        placeholder="Search units..."
+                        placeholder="Search megalas..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10 bg-background/50"
@@ -100,7 +100,7 @@ export default function Home() {
                   <TableHeader>
                     <TableRow className="hover:bg-transparent text-xs uppercase tracking-wider">
                       <TableHead className="w-24 text-center">Rank</TableHead>
-                      <TableHead>Unit Name</TableHead>
+                      <TableHead>Megala Name</TableHead>
                       {events.map(event => (
                         <TableHead key={event.id} className="text-center">{event.name}</TableHead>
                       ))}
@@ -130,7 +130,7 @@ export default function Home() {
                     {filteredUnits.length === 0 && !loading && (
                          <TableRow>
                             <TableCell colSpan={events.length + 3} className="text-center py-16 text-muted-foreground">
-                                <p>No units found matching "{searchTerm}".</p>
+                                <p>No megalas found matching "{searchTerm}".</p>
                             </TableCell>
                         </TableRow>
                     )}

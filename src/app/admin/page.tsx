@@ -38,28 +38,28 @@ export default async function AdminDashboardPage() {
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Units
+              Total Megalas
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUnits}</div>
             <p className="text-xs text-muted-foreground">
-              Participating units in the event
+              Participating megalas in the event
             </p>
           </CardContent>
         </Card>
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Top Scoring Unit
+              Top Scoring Megala
             </CardTitle>
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold truncate">{topScoringUnit?.name || 'N/A'}</div>
             <p className="text-xs text-muted-foreground">
-              {topScoringUnit ? `Currently leading with ${getTotalScore(topScoringUnit)} points` : 'No units available'}
+              {topScoringUnit ? `Currently leading with ${getTotalScore(topScoringUnit)} points` : 'No megalas available'}
             </p>
           </CardContent>
         </Card>
@@ -81,7 +81,7 @@ export default async function AdminDashboardPage() {
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>Manage Scores</CardTitle>
-            <CardDescription>View and update scores for all participating units.</CardDescription>
+            <CardDescription>View and update scores for all participating megalas.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild>
@@ -91,12 +91,12 @@ export default async function AdminDashboardPage() {
         </Card>
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>Manage Units</CardTitle>
-            <CardDescription>Add new units or edit existing participant details.</CardDescription>
+            <CardTitle>Manage Megalas</CardTitle>
+            <CardDescription>Add new megalas or edit existing participant details.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/admin/units">Go to Units <ArrowRight className="ml-2" /></Link>
+              <Link href="/admin/units">Go to Megalas <ArrowRight className="ml-2" /></Link>
             </Button>
           </CardContent>
         </Card>

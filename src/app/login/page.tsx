@@ -60,9 +60,9 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-10rem)] py-12 px-4 bg-accent/50">
       <Card className="mx-auto max-w-sm w-full shadow-lg border-none">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline">Unit Sign-in</CardTitle>
+          <CardTitle className="text-2xl font-headline">Megala Sign-in</CardTitle>
           <CardDescription>
-            Enter your credential to access your unit's dashboard.
+            Enter your credential to access your megala's dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>

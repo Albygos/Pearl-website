@@ -124,7 +124,7 @@ export default function DashboardPage() {
                 {rank ? `#${rank}` : 'N/A'}
               </div>
               <p className="text-xs text-muted-foreground">
-                Based on total score across all units
+                Based on total score across all megalas
               </p>
             </CardContent>
           </Card>
