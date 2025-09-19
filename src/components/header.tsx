@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import Logo from './logo';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
-import { Menu, Shield, Users, Star, BarChart, Home } from 'lucide-react';
+import { Menu, Shield, Users, Star, BarChart, Home, ImageIcon } from 'lucide-react';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -15,8 +15,9 @@ const navLinks = [
 
 const adminNavLinks = [
     { href: '/admin', label: 'Dashboard', icon: Shield },
-    { href: '/admin/scores', label: 'Manage Scores', icon: Star },
     { href: '/admin/units', label: 'Manage Units', icon: Users },
+    { href: '/admin/scores', label: 'Manage Scores', icon: Star },
+    { href: '/admin/gallery', label: 'Manage Gallery', icon: ImageIcon },
     { href: '/admin/performance', label: 'Performance', icon: BarChart },
 ];
 
