@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import Logo from './logo';
 import { Button } from './ui/button';
@@ -29,8 +29,11 @@ import {
   Home,
   ImageIcon,
   ChevronDown,
+  LogOut,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -48,19 +51,30 @@ const adminNavLinks = [
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const isAdminPage = pathname.startsWith('/admin');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isUnitLoggedIn, setIsUnitLoggedIn] = useState(false);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setIsLoggedIn(!!localStorage.getItem('artfestlive_unit_id'));
+      setIsUnitLoggedIn(!!localStorage.getItem('artfestlive_unit_id'));
     }
+     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAdminLoggedIn(!!user);
+    });
+    return () => unsubscribe();
   }, [pathname]);
 
-  const handleSignOut = () => {
+  const handleUnitSignOut = () => {
     localStorage.removeItem('artfestlive_unit_id');
-    setIsLoggedIn(false);
-    //
+    setIsUnitLoggedIn(false);
+    router.push('/login');
+  };
+
+  const handleAdminSignOut = async () => {
+    await signOut(auth);
+    router.push('/admin/login');
   };
 
 
@@ -85,9 +99,9 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {isAdminPage && (
-            <div className="hidden md:block">
-              <DropdownMenu>
+          {isAdminPage ? (
+             isAdminLoggedIn && (
+               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost">
                     Admin Menu
@@ -112,24 +126,26 @@ export default function Header() {
                         <span>Back to Site</span>
                       </Link>
                     </DropdownMenuItem>
+                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleAdminSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Sign Out</span>
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-          )}
-
-          {isLoggedIn ? (
-            <Button variant="outline" onClick={handleSignOut} asChild>
-              <Link href="/login">Sign Out</Link>
+            )
+          ) : isUnitLoggedIn ? (
+            <Button variant="outline" onClick={handleUnitSignOut}>
+              Sign Out
             </Button>
           ) : (
-             pathname !== '/login' && (
+             pathname !== '/login' && !pathname.startsWith('/admin') && (
               <Button asChild>
-                <Link href="/login">Sign In</Link>
+                <Link href="/login">Unit Sign In</Link>
               </Button>
             )
           )}
           
-
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
@@ -160,22 +176,26 @@ export default function Header() {
                           </Link>
                         ))}
                         <hr />
-                        <p className="text-sm font-medium text-muted-foreground px-2 pt-2">Admin</p>
-                        {adminNavLinks.map((link) => (
-                          <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                              'text-lg font-medium flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-secondary',
-                              pathname === link.href
-                                ? 'bg-secondary text-primary'
-                                : 'text-muted-foreground'
-                            )}
-                          >
-                            <link.icon className="h-5 w-5" />
-                            {link.label}
-                          </Link>
-                        ))}
+                        {isAdminLoggedIn && (
+                          <>
+                          <p className="text-sm font-medium text-muted-foreground px-2 pt-2">Admin</p>
+                          {adminNavLinks.map((link) => (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              className={cn(
+                                'text-lg font-medium flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-secondary',
+                                pathname === link.href
+                                  ? 'bg-secondary text-primary'
+                                  : 'text-muted-foreground'
+                              )}
+                            >
+                              <link.icon className="h-5 w-5" />
+                              {link.label}
+                            </Link>
+                          ))}
+                          </>
+                        )}
                       </>
                     ) : (
                       <>
