@@ -11,7 +11,7 @@ import {
   SidebarMenuButton,
   SidebarProvider,
   SidebarInset,
-} from "@/components/ui/sidebar";
+} from "@/components/sidebar";
 import Logo from "@/components/logo";
 
 export default function AdminLayout({
