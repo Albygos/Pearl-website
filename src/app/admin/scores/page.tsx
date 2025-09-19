@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -31,6 +31,7 @@ import { getUnits, updateUnitScore } from '@/lib/services/units';
 import type { Unit, EventScore } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Search } from 'lucide-react';
 
 type SelectedScore = {
   unit: Unit;
@@ -38,6 +39,7 @@ type SelectedScore = {
 }
 
 const getTotalScore = (unit: Unit) => {
+  if (!unit.events) return 0;
   return unit.events.reduce((total, event) => total + event.score, 0);
 };
 
@@ -47,6 +49,7 @@ export default function ManageScoresPage() {
   const [selectedScore, setSelectedScore] = useState<SelectedScore | null>(null);
   const [newScore, setNewScore] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -59,6 +62,14 @@ export default function ManageScoresPage() {
     }
     fetchUnits();
   }, []);
+
+  const filteredUnits = useMemo(() => {
+    const sorted = [...units].sort((a,b) => getTotalScore(b) - getTotalScore(a));
+    if (!searchTerm) return sorted;
+    return sorted.filter(unit =>
+      unit.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [units, searchTerm]);
 
   const handleEditClick = (unit: Unit, event: EventScore) => {
     setSelectedScore({ unit, event });
@@ -78,7 +89,6 @@ export default function ManageScoresPage() {
           }
           return u;
         });
-        updatedUnits.sort((a,b) => getTotalScore(b) - getTotalScore(a));
         setUnits(updatedUnits);
         toast({
           title: 'Score Updated',
@@ -100,9 +110,20 @@ export default function ManageScoresPage() {
   
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <header className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-headline font-bold">Manage Scores</h1>
-        <p className="text-muted-foreground">Update scores for participating units across all events.</p>
+      <header className="mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <div>
+            <h1 className="text-3xl md:text-4xl font-headline font-bold">Manage Scores</h1>
+            <p className="text-muted-foreground">Update scores for participating units across all events.</p>
+        </div>
+        <div className="relative w-full sm:max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+                placeholder="Search units..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+            />
+        </div>
       </header>
       <Card className="shadow-sm">
         <CardContent className="pt-6">
@@ -125,7 +146,7 @@ export default function ManageScoresPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {units.map((unit) => (
+                {filteredUnits.map((unit) => (
                   <TableRow key={unit.id} className="hover:bg-accent/50 transition-colors">
                     <TableCell className="font-medium truncate max-w-xs">{unit.name}</TableCell>
                     {unit.events.map(event => (
@@ -138,6 +159,13 @@ export default function ManageScoresPage() {
                     <TableCell className="text-right font-bold">{getTotalScore(unit)}</TableCell>
                   </TableRow>
                 ))}
+                 {filteredUnits.length === 0 && (
+                    <TableRow>
+                        <TableCell colSpan={(units[0]?.events?.length || 0) + 2} className="text-center text-muted-foreground py-8">
+                           No units found matching "{searchTerm}".
+                        </TableCell>
+                    </TableRow>
+                  )}
               </TableBody>
             </Table>
           </div>

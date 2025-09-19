@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import type { Unit } from '@/lib/types';
 import { summarizeUnitPerformance } from '@/ai/flows/summarize-unit-performance';
 import { useToast } from '@/hooks/use-toast';
-import { Wand2, Loader, BarChart, Eye, Star } from 'lucide-react';
+import { Wand2, Loader, BarChart, Eye, Star, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getUnits } from '@/lib/services/units';
 
@@ -28,6 +29,7 @@ export default function PerformancePage() {
   const [loading, setLoading] = useState(true);
   const [summaries, setSummaries] = useState<Summaries>({});
   const [loadingStates, setLoadingStates] = useState<LoadingStates>({});
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
    useEffect(() => {
@@ -39,6 +41,12 @@ export default function PerformancePage() {
     }
     fetchUnits();
   }, []);
+
+  const filteredUnits = useMemo(() => {
+    return units.filter(unit =>
+      unit.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [units, searchTerm]);
 
   const handleGenerateSummary = async (unit: Unit) => {
     setLoadingStates(prev => ({ ...prev, [unit.id]: true }));
@@ -63,11 +71,22 @@ export default function PerformancePage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <header className="mb-8">
-        <h1 className="text-3xl md:text-4xl font-headline font-bold">Unit Performance</h1>
-        <p className="text-muted-foreground">
-          Generate AI-powered performance summaries for each unit.
-        </p>
+      <header className="mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-headline font-bold">Unit Performance</h1>
+          <p className="text-muted-foreground">
+            Generate AI-powered performance summaries for each unit.
+          </p>
+        </div>
+        <div className="relative w-full sm:max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+                placeholder="Search units..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+            />
+        </div>
       </header>
        {loading ? (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -94,7 +113,7 @@ export default function PerformancePage() {
           </div>
         ) : (
       <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-        {units.map(unit => (
+        {filteredUnits.map(unit => (
           <Card key={unit.id} className="flex flex-col hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -153,6 +172,11 @@ export default function PerformancePage() {
             </CardFooter>
           </Card>
         ))}
+         {filteredUnits.length === 0 && (
+            <div className="md:col-span-2 xl:col-span-3 text-center text-muted-foreground py-16">
+              No units found matching "{searchTerm}".
+            </div>
+        )}
       </div>
       )}
     </div>

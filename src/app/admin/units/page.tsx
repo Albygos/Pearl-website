@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -31,7 +31,7 @@ import { Label } from '@/components/ui/label';
 import { getUnits, addUnit, deleteUnit } from '@/lib/services/units';
 import type { Unit } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Loader, Wand2, Plus, Trash2 } from 'lucide-react';
+import { Loader, Wand2, Plus, Trash2, Search } from 'lucide-react';
 import { suggestUnitName } from '@/ai/flows/suggest-unit-name';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -60,6 +60,7 @@ export default function ManageUnitsPage() {
   const [newUnitTheme, setNewUnitTheme] = useState('');
   const [newUnitCredentialId, setNewUnitCredentialId] = useState('');
   const [isSuggestingName, setIsSuggestingName] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -71,6 +72,14 @@ export default function ManageUnitsPage() {
     }
     fetchUnits();
   }, []);
+
+  const filteredUnits = useMemo(() => {
+    return units.filter(unit =>
+      unit.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      unit.theme.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      unit.credentialId.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [units, searchTerm]);
   
   const generateCredentialId = () => {
     return Math.random().toString(36).substring(2, 10).toUpperCase();
@@ -162,51 +171,62 @@ export default function ManageUnitsPage() {
           <h1 className="text-3xl md:text-4xl font-headline font-bold">Manage Units</h1>
           <p className="text-muted-foreground">Add, edit, or delete participating units.</p>
         </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Unit
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>Add New Unit</DialogTitle>
-                    <DialogDescription>
-                        Fill in the details for the new unit. It will be initialized with 0 points for all events.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="theme" className="text-right">Theme</Label>
-                        <Input id="theme" value={newUnitTheme} onChange={(e) => setNewUnitTheme(e.target.value)} className="col-span-3" placeholder="e.g., 'Cosmic Dreams'"/>
-                    </div>
-                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="name" className="text-right">Unit Name</Label>
-                        <Input id="name" value={newUnitName} onChange={(e) => setNewUnitName(e.target.value)} className="col-span-3" placeholder="Creative name"/>
-                    </div>
-                     <div className="grid grid-cols-4 items-center gap-4">
-                        <div className="col-start-2 col-span-3">
-                            <Button variant="outline" size="sm" onClick={handleSuggestName} disabled={isSuggestingName}>
-                                {isSuggestingName ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                                Suggest Name
-                            </Button>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="relative w-full sm:max-w-xs">
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                    placeholder="Search units..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                />
+            </div>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                    <Button className="flex-shrink-0">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Unit
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Add New Unit</DialogTitle>
+                        <DialogDescription>
+                            Fill in the details for the new unit. It will be initialized with 0 points for all events.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="theme" className="text-right">Theme</Label>
+                            <Input id="theme" value={newUnitTheme} onChange={(e) => setNewUnitTheme(e.target.value)} className="col-span-3" placeholder="e.g., 'Cosmic Dreams'"/>
+                        </div>
+                         <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="name" className="text-right">Unit Name</Label>
+                            <Input id="name" value={newUnitName} onChange={(e) => setNewUnitName(e.target.value)} className="col-span-3" placeholder="Creative name"/>
+                        </div>
+                         <div className="grid grid-cols-4 items-center gap-4">
+                            <div className="col-start-2 col-span-3">
+                                <Button variant="outline" size="sm" onClick={handleSuggestName} disabled={isSuggestingName}>
+                                    {isSuggestingName ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                                    Suggest Name
+                                </Button>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="credentialId" className="text-right">Credential ID</Label>
+                            <div className="col-span-3 flex items-center gap-2">
+                               <Input id="credentialId" value={newUnitCredentialId} onChange={(e) => setNewUnitCredentialId(e.target.value)} placeholder="Unique ID for login"/>
+                               <Button variant="outline" size="sm" onClick={() => setNewUnitCredentialId(generateCredentialId())}>Generate</Button>
+                            </div>
                         </div>
                     </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="credentialId" className="text-right">Credential ID</Label>
-                        <div className="col-span-3 flex items-center gap-2">
-                           <Input id="credentialId" value={newUnitCredentialId} onChange={(e) => setNewUnitCredentialId(e.target.value)} placeholder="Unique ID for login"/>
-                           <Button variant="outline" size="sm" onClick={() => setNewUnitCredentialId(generateCredentialId())}>Generate</Button>
-                        </div>
-                    </div>
-                </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                    <Button type="submit" onClick={handleAddUnit}>Add Unit</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+                        <Button type="submit" onClick={handleAddUnit}>Add Unit</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
       </header>
       <Card>
         <CardContent className="pt-6">
@@ -229,7 +249,7 @@ export default function ManageUnitsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {units.map((unit) => (
+                  {filteredUnits.map((unit) => (
                     <TableRow key={unit.id} className="hover:bg-accent/50 transition-colors">
                       <TableCell className="font-medium truncate max-w-[150px] sm:max-w-xs">{unit.name}</TableCell>
                       <TableCell className="hidden md:table-cell truncate max-w-[150px] sm:max-w-xs">{unit.theme}</TableCell>
@@ -258,6 +278,13 @@ export default function ManageUnitsPage() {
                       </TableCell>
                     </TableRow>
                   ))}
+                  {filteredUnits.length === 0 && (
+                    <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                           No units found matching "{searchTerm}".
+                        </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
