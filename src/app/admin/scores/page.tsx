@@ -28,10 +28,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { getUnits, updateUnitScore } from '@/lib/services/units';
-import type { Unit, EventScore } from '@/lib/types';
+import { getEvents } from '@/lib/services/events';
+import type { Unit, EventScore, AppEvent } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 
 type SelectedScore = {
   unit: Unit;
@@ -45,6 +46,7 @@ const getTotalScore = (unit: Unit) => {
 
 export default function ManageScoresPage() {
   const [units, setUnits] = useState<Unit[]>([]);
+  const [events, setEvents] = useState<AppEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedScore, setSelectedScore] = useState<SelectedScore | null>(null);
   const [newScore, setNewScore] = useState('');
@@ -53,14 +55,15 @@ export default function ManageScoresPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    async function fetchUnits() {
+    async function fetchData() {
       setLoading(true);
-      const fetchedUnits = await getUnits();
+      const [fetchedUnits, fetchedEvents] = await Promise.all([getUnits(), getEvents()]);
       fetchedUnits.sort((a,b) => getTotalScore(b) - getTotalScore(a));
       setUnits(fetchedUnits);
+      setEvents(fetchedEvents);
       setLoading(false);
     }
-    fetchUnits();
+    fetchData();
   }, []);
 
   const filteredUnits = useMemo(() => {
@@ -107,22 +110,56 @@ export default function ManageScoresPage() {
       setNewScore('');
     }
   };
+
+  const handleDownloadFullScoreboard = () => {
+    if (units.length === 0 || events.length === 0) return;
+
+    const sortedUnits = [...units].sort((a,b) => getTotalScore(b) - getTotalScore(a));
+
+    const headers = ['Rank', 'Unit Name', ...events.map(e => e.name), 'Total Score'];
+    
+    const rows = sortedUnits.map((unit, index) => {
+      const rank = index + 1;
+      const unitName = `"${unit.name}"`;
+      const eventScores = events.map(event => unit.events.find(e => e.name === event.name)?.score ?? 0);
+      const totalScore = getTotalScore(unit);
+      return [rank, unitName, ...eventScores, totalScore].join(',');
+    });
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += headers.join(",") + "\n";
+    csvContent += rows.join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "full_scoreboard.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
   
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <header className="mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <header className="mb-8 flex flex-col sm:flex-row justify-between sm:items-start gap-4">
         <div>
             <h1 className="text-3xl md:text-4xl font-headline font-bold">Manage Scores</h1>
             <p className="text-muted-foreground">Update scores for participating units across all events.</p>
         </div>
-        <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-                placeholder="Search units..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-            />
+        <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap justify-end">
+            <div className="relative w-full sm:max-w-xs">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                    placeholder="Search units..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                />
+            </div>
+             <Button onClick={handleDownloadFullScoreboard} variant="outline">
+                <Download className="mr-2" />
+                Download Scoreboard (CSV)
+            </Button>
         </div>
       </header>
       <Card className="shadow-sm">
@@ -139,8 +176,8 @@ export default function ManageScoresPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Unit Name</TableHead>
-                  {units[0]?.events.map(event => (
-                      <TableHead key={event.name} className="text-center">{event.name}</TableHead>
+                  {events.map(event => (
+                      <TableHead key={event.id} className="text-center">{event.name}</TableHead>
                   ))}
                   <TableHead className="text-right">Total Score</TableHead>
                 </TableRow>
@@ -149,10 +186,10 @@ export default function ManageScoresPage() {
                 {filteredUnits.map((unit) => (
                   <TableRow key={unit.id} className="hover:bg-accent/50 transition-colors">
                     <TableCell className="font-medium truncate max-w-xs">{unit.name}</TableCell>
-                    {unit.events.map(event => (
-                       <TableCell key={event.name} className="text-center">
-                         <Button variant="link" size="sm" onClick={() => handleEditClick(unit, event)}>
-                          {event.score}
+                    {events.map(event => (
+                       <TableCell key={event.id} className="text-center">
+                         <Button variant="link" size="sm" onClick={() => handleEditClick(unit, unit.events.find(e => e.name === event.name) || { name: event.name, score: 0 } )}>
+                          {unit.events.find(e => e.name === event.name)?.score ?? 0}
                         </Button>
                        </TableCell>
                     ))}
@@ -161,7 +198,7 @@ export default function ManageScoresPage() {
                 ))}
                  {filteredUnits.length === 0 && (
                     <TableRow>
-                        <TableCell colSpan={(units[0]?.events?.length || 0) + 2} className="text-center text-muted-foreground py-8">
+                        <TableCell colSpan={events.length + 2} className="text-center text-muted-foreground py-8">
                            No units found matching "{searchTerm}".
                         </TableCell>
                     </TableRow>

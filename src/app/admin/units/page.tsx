@@ -31,7 +31,7 @@ import { Label } from '@/components/ui/label';
 import { getUnits, addUnit, deleteUnit } from '@/lib/services/units';
 import type { Unit } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Loader, Wand2, Plus, Trash2, Search } from 'lucide-react';
+import { Loader, Wand2, Plus, Trash2, Search, Download } from 'lucide-react';
 import { suggestUnitName } from '@/ai/flows/suggest-unit-name';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -164,6 +164,42 @@ export default function ManageUnitsPage() {
     }
   };
 
+  const handleDownloadUnitRoster = () => {
+    const headers = ['Unit Name'];
+    const rows = units.map(unit => `"${unit.name}"`);
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += headers.join(",") + "\n";
+    csvContent += rows.join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "unit_roster.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDownloadUnitScorecard = (unit: Unit) => {
+    const headers = ['Event', 'Score'];
+    const rows = unit.events.map(event => `"${event.name}",${event.score}`);
+    const totalScoreRow = `"Total Score",${getTotalScore(unit)}`;
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += headers.join(",") + "\n";
+    csvContent += rows.join("\n");
+    csvContent += "\n" + totalScoreRow;
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${unit.name}_scorecard.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <header className="flex flex-col sm:flex-row justify-between sm:items-start mb-8 gap-4">
@@ -171,7 +207,7 @@ export default function ManageUnitsPage() {
           <h1 className="text-3xl md:text-4xl font-headline font-bold">Manage Units</h1>
           <p className="text-muted-foreground">Add, edit, or delete participating units.</p>
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap justify-end">
             <div className="relative w-full sm:max-w-xs">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
@@ -181,6 +217,10 @@ export default function ManageUnitsPage() {
                     className="pl-10"
                 />
             </div>
+            <Button onClick={handleDownloadUnitRoster} variant="outline">
+                <Download className="mr-2 h-4 w-4" />
+                Download Roster
+            </Button>
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                     <Button className="flex-shrink-0">
@@ -256,25 +296,30 @@ export default function ManageUnitsPage() {
                       <TableCell className="hidden sm:table-cell font-mono text-xs">{unit.credentialId}</TableCell>
                       <TableCell className="text-right font-bold">{getTotalScore(unit)}</TableCell>
                       <TableCell className="text-right">
-                         <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                              <Trash2 className="h-4 w-4" />
+                        <div className="flex justify-end items-center gap-1">
+                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" onClick={() => handleDownloadUnitScorecard(unit)}>
+                                <Download className="h-4 w-4" />
                             </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the unit "{unit.name}".
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteUnit(unit.id)}>Delete</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                            <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the unit "{unit.name}".
+                                </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteUnit(unit.id)}>Delete</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
