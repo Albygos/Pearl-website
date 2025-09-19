@@ -1,8 +1,13 @@
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import { galleryImages } from '@/lib/mock-data';
+import { getGalleryImages } from '@/lib/services/gallery';
+import { unstable_noStore as noStore } from 'next/cache';
 
-export default function GalleryPage() {
+
+export default async function GalleryPage() {
+  noStore();
+  const galleryImages = await getGalleryImages();
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="text-center mb-12">

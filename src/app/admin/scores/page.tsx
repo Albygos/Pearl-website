@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -24,20 +24,31 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { units as mockUnits } from '@/lib/mock-data';
+import { getUnits, updateUnitScore } from '@/lib/services/units';
 import type { Unit } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ManageScoresPage() {
-  const [units, setUnits] = useState<Unit[]>(mockUnits.sort((a,b) => b.score - a.score));
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
   const [newScore, setNewScore] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchUnits() {
+      setLoading(true);
+      const fetchedUnits = await getUnits();
+      setUnits(fetchedUnits.sort((a,b) => b.score - a.score));
+      setLoading(false);
+    }
+    fetchUnits();
+  }, []);
 
   const handleEditClick = (unit: Unit) => {
     setSelectedUnit(unit);
@@ -45,16 +56,27 @@ export default function ManageScoresPage() {
     setIsDialogOpen(true);
   };
 
-  const handleScoreUpdate = () => {
+  const handleScoreUpdate = async () => {
     if (selectedUnit && newScore) {
-      const updatedUnits = units.map((u) =>
-        u.id === selectedUnit.id ? { ...u, score: parseInt(newScore, 10) } : u
-      ).sort((a,b) => b.score - a.score);
-      setUnits(updatedUnits);
-      toast({
-        title: 'Score Updated',
-        description: `${selectedUnit.name}'s score has been updated to ${newScore}.`,
-      });
+      const scoreValue = parseInt(newScore, 10);
+      try {
+        await updateUnitScore(selectedUnit.id, scoreValue);
+        const updatedUnits = units.map((u) =>
+          u.id === selectedUnit.id ? { ...u, score: scoreValue } : u
+        ).sort((a,b) => b.score - a.score);
+        setUnits(updatedUnits);
+        toast({
+          title: 'Score Updated',
+          description: `${selectedUnit.name}'s score has been updated to ${newScore}.`,
+        });
+      } catch (error) {
+         toast({
+          title: 'Error',
+          description: `Failed to update score.`,
+          variant: 'destructive'
+        });
+      }
+      
       setIsDialogOpen(false);
       setSelectedUnit(null);
       setNewScore('');
@@ -69,6 +91,13 @@ export default function ManageScoresPage() {
       </header>
       <Card>
         <CardContent className="pt-6">
+          {loading ? (
+             <div className="space-y-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+             </div>
+          ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -91,6 +120,7 @@ export default function ManageScoresPage() {
               ))}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
 

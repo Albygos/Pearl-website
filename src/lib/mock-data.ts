@@ -1,5 +1,8 @@
 import type { Unit, GalleryImage } from './types';
 
+// This file is now a fallback and can be removed if you fully migrate to a database.
+// The data services in /lib/services will be used instead.
+
 export const units: Unit[] = [
   { id: '1', name: 'Chromatic Weavers', score: 95, theme: 'Woven Rainbows', photoAccessCount: 25 },
   { id: '2', name: 'Marble Sculptors Collective', score: 92, theme: 'Stone Dreams', photoAccessCount: 18 },

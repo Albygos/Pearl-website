@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { units as mockUnits } from '@/lib/mock-data';
 import type { Unit } from '@/lib/types';
 import { summarizeUnitPerformance } from '@/ai/flows/summarize-unit-performance';
 import { useToast } from '@/hooks/use-toast';
 import { Wand2, Loader, BarChart, Eye, Star } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getUnits } from '@/lib/services/units';
 
 type Summaries = {
   [unitId: string]: string;
@@ -19,10 +19,21 @@ type LoadingStates = {
 };
 
 export default function PerformancePage() {
-  const [units] = useState<Unit[]>(mockUnits);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [loading, setLoading] = useState(true);
   const [summaries, setSummaries] = useState<Summaries>({});
   const [loadingStates, setLoadingStates] = useState<LoadingStates>({});
   const { toast } = useToast();
+
+   useEffect(() => {
+    async function fetchUnits() {
+      setLoading(true);
+      const fetchedUnits = await getUnits();
+      setUnits(fetchedUnits);
+      setLoading(false);
+    }
+    fetchUnits();
+  }, []);
 
   const handleGenerateSummary = async (unit: Unit) => {
     setLoadingStates(prev => ({ ...prev, [unit.id]: true }));
@@ -53,6 +64,30 @@ export default function PerformancePage() {
           Generate AI-powered performance summaries for each unit.
         </p>
       </header>
+       {loading ? (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i} className="flex flex-col">
+                <CardHeader>
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent className="flex-grow space-y-4">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                   <div className="space-y-2 pt-2">
+                     <Skeleton className="h-5 w-1/3" />
+                     <Skeleton className="h-4 w-full" />
+                     <Skeleton className="h-4 w-4/5" />
+                   </div>
+                </CardContent>
+                <CardFooter>
+                   <Skeleton className="h-10 w-full" />
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : (
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {units.map(unit => (
           <Card key={unit.id} className="flex flex-col">
@@ -114,6 +149,7 @@ export default function PerformancePage() {
           </Card>
         ))}
       </div>
+      )}
     </div>
   );
 }

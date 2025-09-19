@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -28,14 +28,16 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { units as mockUnits } from '@/lib/mock-data';
+import { getUnits, addUnit } from '@/lib/services/units';
 import type { Unit } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Loader, Wand2, Plus } from 'lucide-react';
 import { suggestUnitName } from '@/ai/flows/suggest-unit-name';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ManageUnitsPage() {
-  const [units, setUnits] = useState<Unit[]>(mockUnits);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newUnitName, setNewUnitName] = useState('');
   const [newUnitTheme, setNewUnitTheme] = useState('');
@@ -43,24 +45,42 @@ export default function ManageUnitsPage() {
   const [isSuggestingName, setIsSuggestingName] = useState(false);
   const { toast } = useToast();
 
-  const handleAddUnit = () => {
+  useEffect(() => {
+    async function fetchUnits() {
+      setLoading(true);
+      const fetchedUnits = await getUnits();
+      setUnits(fetchedUnits);
+      setLoading(false);
+    }
+    fetchUnits();
+  }, []);
+
+  const handleAddUnit = async () => {
     if (newUnitName && newUnitTheme) {
-      const newUnit: Unit = {
-        id: (units.length + 1).toString(),
+      const newUnit: Omit<Unit, 'id'> = {
         name: newUnitName,
         theme: newUnitTheme,
         score: parseInt(newUnitScore, 10),
         photoAccessCount: 0,
       };
-      setUnits([...units, newUnit]);
-      toast({
-        title: 'Unit Added',
-        description: `"${newUnitName}" has been added to the event.`,
-      });
-      setIsAddDialogOpen(false);
-      setNewUnitName('');
-      setNewUnitTheme('');
-      setNewUnitScore('0');
+      try {
+        const newUnitId = await addUnit(newUnit);
+        setUnits([...units, { ...newUnit, id: newUnitId }]);
+        toast({
+          title: 'Unit Added',
+          description: `"${newUnitName}" has been added to the event.`,
+        });
+        setIsAddDialogOpen(false);
+        setNewUnitName('');
+        setNewUnitTheme('');
+        setNewUnitScore('0');
+      } catch (error) {
+        toast({
+            title: 'Error Adding Unit',
+            description: `There was a problem saving the new unit.`,
+            variant: 'destructive'
+        });
+      }
     } else {
         toast({
             title: 'Missing Information',
@@ -147,6 +167,13 @@ export default function ManageUnitsPage() {
       </header>
       <Card>
         <CardContent className="pt-6">
+           {loading ? (
+             <div className="space-y-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+             </div>
+          ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -165,6 +192,7 @@ export default function ManageUnitsPage() {
               ))}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
     </div>

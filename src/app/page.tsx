@@ -1,9 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Crown, Trophy, Award } from 'lucide-react';
-import { units } from '@/lib/mock-data';
+import { getUnits } from '@/lib/services/units';
+import { unstable_noStore as noStore } from 'next/cache';
 
-export default function Home() {
+export default async function Home() {
+  noStore();
+  const units = await getUnits();
   const sortedUnits = [...units].sort((a, b) => b.score - a.score);
 
   const getRankIcon = (rank: number) => {

@@ -8,12 +8,18 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Star, Users, Image as ImageIcon } from 'lucide-react';
-import { units, galleryImages } from '@/lib/mock-data';
+import { getUnits } from '@/lib/services/units';
+import { getGalleryImages } from '@/lib/services/gallery';
+import { unstable_noStore as noStore } from 'next/cache';
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  noStore();
+  const units = await getUnits();
+  const galleryImages = await getGalleryImages();
+
   const totalUnits = units.length;
   const totalImages = galleryImages.length;
-  const topScoringUnit = [...units].sort((a, b) => b.score - a.score)[0];
+  const topScoringUnit = totalUnits > 0 ? [...units].sort((a, b) => b.score - a.score)[0] : null;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -45,9 +51,9 @@ export default function AdminDashboardPage() {
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{topScoringUnit.name}</div>
+            <div className="text-2xl font-bold">{topScoringUnit?.name || 'N/A'}</div>
             <p className="text-xs text-muted-foreground">
-              Currently leading with {topScoringUnit.score} points
+              {topScoringUnit ? `Currently leading with ${topScoringUnit.score} points` : 'No units available'}
             </p>
           </CardContent>
         </Card>

@@ -1,11 +1,28 @@
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import { galleryImages, units } from '@/lib/mock-data';
+import { getUnits } from '@/lib/services/units';
+import { getGalleryImages } from '@/lib/services/gallery';
+import { unstable_noStore as noStore } from 'next/cache';
 
-export default function DashboardPage() {
-  // Mocking a logged-in user (Unit: Chromatic Weavers)
-  const loggedInUnit = units[0];
+export default async function DashboardPage() {
+  noStore();
+  // We'll replace this with actual authentication later
+  const MOCK_LOGGED_IN_UNIT_ID = '1';
+
+  const units = await getUnits();
+  const galleryImages = await getGalleryImages();
+
+  // In a real app, you'd get the logged-in user's ID from an auth session
+  const loggedInUnit = units.find(u => u.id === MOCK_LOGGED_IN_UNIT_ID) || units[0];
   const unitImages = galleryImages.filter(img => img.unitId === loggedInUnit.id);
+
+  if (!loggedInUnit) {
+     return (
+        <div className="container mx-auto py-8 px-4 text-center">
+          <p className="text-lg text-muted-foreground">Could not load unit data.</p>
+        </div>
+      )
+  }
 
   return (
     <div className="container mx-auto py-8 px-4">
