@@ -120,7 +120,6 @@ export default function PerformancePage() {
                 <BarChart className="h-5 w-5 text-primary" />
                 {unit.name}
               </CardTitle>
-              <CardDescription>{unit.theme}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
               <div className="flex items-center justify-between text-sm border p-3 rounded-lg">

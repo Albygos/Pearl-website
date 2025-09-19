@@ -1,5 +1,5 @@
 import { database } from '@/lib/firebase';
-import { ref, get, set, child, push, remove, runTransaction } from 'firebase/database';
+import { ref, get, set, child, push, remove, runTransaction, update } from 'firebase/database';
 import type { Unit, EventScore } from '@/lib/types';
 import { getEvents } from './events';
 
@@ -148,7 +148,6 @@ export async function addUnit(unit: Omit<Unit, 'id' | 'events' | 'photoAccessCou
 
         const unitToAdd = {
             name: unit.name,
-            theme: unit.theme,
             credentialId: unit.credentialId,
             photoAccessCount: 0,
             events: initialEvents,
@@ -159,6 +158,16 @@ export async function addUnit(unit: Omit<Unit, 'id' | 'events' | 'photoAccessCou
         return newUnitKey;
     } catch (error) {
         console.error("Error adding unit:", error);
+        throw error;
+    }
+}
+
+export async function updateUnit(unitId: string, data: Partial<Unit>): Promise<void> {
+    try {
+        const unitRef = child(dbRef, `units/${unitId}`);
+        await update(unitRef, data);
+    } catch (error) {
+        console.error("Error updating unit: ", error);
         throw error;
     }
 }

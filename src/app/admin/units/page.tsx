@@ -28,11 +28,10 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { getUnits, addUnit, deleteUnit } from '@/lib/services/units';
+import { getUnits, addUnit, updateUnit, deleteUnit } from '@/lib/services/units';
 import type { Unit } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Loader, Wand2, Plus, Trash2, Search, Download } from 'lucide-react';
-import { suggestUnitName } from '@/ai/flows/suggest-unit-name';
+import { Loader, Plus, Trash2, Search, Download, Edit } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
@@ -56,10 +55,15 @@ export default function ManageUnitsPage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   const [newUnitName, setNewUnitName] = useState('');
-  const [newUnitTheme, setNewUnitTheme] = useState('');
   const [newUnitCredentialId, setNewUnitCredentialId] = useState('');
-  const [isSuggestingName, setIsSuggestingName] = useState(false);
+  
+  const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
+  const [editingUnitName, setEditingUnitName] = useState('');
+  const [editingUnitCredentialId, setEditingUnitCredentialId] = useState('');
+
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
@@ -76,7 +80,6 @@ export default function ManageUnitsPage() {
   const filteredUnits = useMemo(() => {
     return units.filter(unit =>
       unit.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      unit.theme.toLowerCase().includes(searchTerm.toLowerCase()) ||
       unit.credentialId.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [units, searchTerm]);
@@ -86,10 +89,9 @@ export default function ManageUnitsPage() {
   }
 
   const handleAddUnit = async () => {
-    if (newUnitName && newUnitTheme && newUnitCredentialId) {
+    if (newUnitName && newUnitCredentialId) {
       const newUnit: Omit<Unit, 'id' | 'events' | 'photoAccessCount'> = {
         name: newUnitName,
-        theme: newUnitTheme,
         credentialId: newUnitCredentialId,
       };
       try {
@@ -104,7 +106,6 @@ export default function ManageUnitsPage() {
         });
         setIsAddDialogOpen(false);
         setNewUnitName('');
-        setNewUnitTheme('');
         setNewUnitCredentialId('');
       } catch (error) {
         toast({
@@ -116,34 +117,49 @@ export default function ManageUnitsPage() {
     } else {
         toast({
             title: 'Missing Information',
-            description: `Please provide a name, theme, and credential ID.`,
+            description: `Please provide a name and credential ID.`,
             variant: 'destructive'
         });
     }
   };
 
-  const handleSuggestName = async () => {
-    if (!newUnitTheme) {
+  const openEditDialog = (unit: Unit) => {
+    setEditingUnit(unit);
+    setEditingUnitName(unit.name);
+    setEditingUnitCredentialId(unit.credentialId);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateUnit = async () => {
+    if (!editingUnit || !editingUnitName || !editingUnitCredentialId) {
       toast({
-        title: 'Theme Required',
-        description: 'Please enter a theme to suggest a name.',
-        variant: 'destructive',
+        title: 'Missing Information',
+        description: 'Please provide a name and credential ID.',
+        variant: 'destructive'
       });
       return;
     }
-    setIsSuggestingName(true);
+    
+    const updatedData: Partial<Unit> = {
+      name: editingUnitName,
+      credentialId: editingUnitCredentialId,
+    };
+
     try {
-      const result = await suggestUnitName({ eventTheme: newUnitTheme });
-      setNewUnitName(result.unitName);
-    } catch (error) {
-      console.error(error);
+      await updateUnit(editingUnit.id, updatedData);
+      setUnits(units.map(u => u.id === editingUnit.id ? { ...u, ...updatedData } : u));
       toast({
-        title: 'Error Suggesting Name',
-        description: 'Could not generate a name. Please try again.',
-        variant: 'destructive',
+        title: 'Unit Updated',
+        description: 'The unit details have been successfully updated.',
       });
-    } finally {
-      setIsSuggestingName(false);
+      setIsEditDialogOpen(false);
+      setEditingUnit(null);
+    } catch (error) {
+      toast({
+        title: 'Error Updating Unit',
+        description: 'There was a problem updating the unit.',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -236,21 +252,9 @@ export default function ManageUnitsPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="theme" className="text-right">Theme</Label>
-                            <Input id="theme" value={newUnitTheme} onChange={(e) => setNewUnitTheme(e.target.value)} className="col-span-3" placeholder="e.g., 'Cosmic Dreams'"/>
-                        </div>
                          <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="name" className="text-right">Unit Name</Label>
                             <Input id="name" value={newUnitName} onChange={(e) => setNewUnitName(e.target.value)} className="col-span-3" placeholder="Creative name"/>
-                        </div>
-                         <div className="grid grid-cols-4 items-center gap-4">
-                            <div className="col-start-2 col-span-3">
-                                <Button variant="outline" size="sm" onClick={handleSuggestName} disabled={isSuggestingName}>
-                                    {isSuggestingName ? <Loader className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                                    Suggest Name
-                                </Button>
-                            </div>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="credentialId" className="text-right">Credential ID</Label>
@@ -282,7 +286,6 @@ export default function ManageUnitsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Unit Name</TableHead>
-                    <TableHead className="hidden md:table-cell">Theme</TableHead>
                     <TableHead className="hidden sm:table-cell">Credential ID</TableHead>
                     <TableHead className="text-right">Total Score</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -292,11 +295,13 @@ export default function ManageUnitsPage() {
                   {filteredUnits.map((unit) => (
                     <TableRow key={unit.id} className="hover:bg-accent/50 transition-colors">
                       <TableCell className="font-medium truncate max-w-[150px] sm:max-w-xs">{unit.name}</TableCell>
-                      <TableCell className="hidden md:table-cell truncate max-w-[150px] sm:max-w-xs">{unit.theme}</TableCell>
                       <TableCell className="hidden sm:table-cell font-mono text-xs">{unit.credentialId}</TableCell>
                       <TableCell className="text-right font-bold">{getTotalScore(unit)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end items-center gap-1">
+                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" onClick={() => openEditDialog(unit)}>
+                                <Edit className="h-4 w-4" />
+                            </Button>
                             <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary" onClick={() => handleDownloadUnitScorecard(unit)}>
                                 <Download className="h-4 w-4" />
                             </Button>
@@ -336,6 +341,33 @@ export default function ManageUnitsPage() {
           )}
         </CardContent>
       </Card>
+      
+      {/* Edit Unit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+                <DialogTitle>Edit Unit</DialogTitle>
+                <DialogDescription>
+                    Update the details for "{editingUnit?.name}".
+                </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit-name" className="text-right">Unit Name</Label>
+                    <Input id="edit-name" value={editingUnitName} onChange={(e) => setEditingUnitName(e.target.value)} className="col-span-3"/>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit-credentialId" className="text-right">Credential ID</Label>
+                    <Input id="edit-credentialId" value={editingUnitCredentialId} onChange={(e) => setEditingUnitCredentialId(e.target.value)} className="col-span-3"/>
+                </div>
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+                <Button type="submit" onClick={handleUpdateUnit}>Save Changes</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
