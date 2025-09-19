@@ -101,11 +101,26 @@ export default function ManageGalleryPage() {
             src: base64String,
             alt: altText,
             aiHint: aiHint,
-            unitId: selectedUnitId || undefined
+        }
+
+        if (selectedUnitId) {
+            newImage.unitId = selectedUnitId;
         }
         
         const newImageId = await addGalleryImage(newImage);
-        setGalleryImages([{ id: newImageId, ...newImage }, ...galleryImages]);
+        
+        // Construct the full new image object for local state update
+        const newImageForState: GalleryImage = {
+          id: newImageId,
+          src: newImage.src,
+          alt: newImage.alt,
+          aiHint: newImage.aiHint,
+        };
+        if (newImage.unitId) {
+          newImageForState.unitId = newImage.unitId;
+        }
+        
+        setGalleryImages([newImageForState, ...galleryImages]);
 
         toast({
             title: 'Upload Successful',
@@ -159,7 +174,7 @@ export default function ManageGalleryPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="unit-select">Assign to Unit (Optional)</Label>
-                <Select onValueChange={setSelectedUnitId} value={selectedUnitId || undefined}>
+                <Select onValueChange={setSelectedUnitId} value={selectedUnitId || ''}>
                     <SelectTrigger id="unit-select">
                         <SelectValue placeholder="Select a unit" />
                     </SelectTrigger>
