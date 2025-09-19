@@ -21,10 +21,21 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Loader } from 'lucide-react';
+import { Upload, Loader, Trash2 } from 'lucide-react';
 import { getUnits } from '@/lib/services/units';
-import { getGalleryImages, addGalleryImage } from '@/lib/services/gallery';
+import { getGalleryImages, addGalleryImage, deleteGalleryImage } from '@/lib/services/gallery';
 import type { Unit, GalleryImage } from '@/lib/types';
 
 export default function ManageGalleryPage() {
@@ -140,6 +151,24 @@ export default function ManageGalleryPage() {
     }
   };
 
+  const handleDeleteImage = async (imageId: string) => {
+    try {
+      await deleteGalleryImage(imageId);
+      setGalleryImages(galleryImages.filter(img => img.id !== imageId));
+      toast({
+        title: 'Image Deleted',
+        description: 'The image has been successfully removed.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error Deleting Image',
+        description: 'There was a problem deleting the image.',
+        variant: 'destructive'
+      });
+    }
+  };
+
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <header className="mb-8">
@@ -179,6 +208,7 @@ export default function ManageGalleryPage() {
                         <SelectValue placeholder="Select a unit" />
                     </SelectTrigger>
                     <SelectContent>
+                        <SelectItem value="">None</SelectItem>
                         {units.map(unit => (
                             <SelectItem key={unit.id} value={unit.id}>{unit.name}</SelectItem>
                         ))}
@@ -201,10 +231,31 @@ export default function ManageGalleryPage() {
            ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {galleryImages.map(image => (
-                    <Card key={image.id} className="overflow-hidden">
-                        <CardContent className="p-0">
+                    <Card key={image.id} className="overflow-hidden group">
+                        <CardContent className="p-0 relative">
                            <div className="aspect-video relative">
                              <Image src={image.src} alt={image.alt} fill className="object-cover" />
+                           </div>
+                           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" size="icon">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the image.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={() => handleDeleteImage(image.id)}>Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
                            </div>
                         </CardContent>
                         <CardFooter className="p-3 bg-muted/50 text-xs text-muted-foreground flex-col items-start">

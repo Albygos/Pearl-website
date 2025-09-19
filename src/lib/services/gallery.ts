@@ -1,5 +1,5 @@
 import { database } from '@/lib/firebase';
-import { ref, get, child, push, set } from 'firebase/database';
+import { ref, get, child, push, set, remove } from 'firebase/database';
 import type { GalleryImage } from '@/lib/types';
 
 const dbRef = ref(database);
@@ -34,4 +34,14 @@ export async function addGalleryImage(image: Omit<GalleryImage, 'id'>): Promise<
     console.error("Error adding gallery image: ", error);
     throw error;
   }
+}
+
+export async function deleteGalleryImage(id: string): Promise<void> {
+    try {
+        const imageRef = child(dbRef, `galleryImages/${id}`);
+        await remove(imageRef);
+    } catch (error) {
+        console.error("Error deleting gallery image: ", error);
+        throw error;
+    }
 }
