@@ -129,27 +129,36 @@ const SidebarMenuButton = React.forwardRef<
 
   const buttonContent = (
     <div
-      ref={ref}
       className={cn(
         "relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group hover:bg-secondary",
         className
       )}
-      {...props}
     >
-      {React.Children.map(children, child =>
-        React.isValidElement(child) && child.type !== 'span' ? React.cloneElement(child as React.ReactElement, { className: 'w-6 h-6' }) : null
-      )}
-      {expanded && (
-        <span className="flex-1 ml-3 whitespace-nowrap transition-all">
-          {React.Children.map(children, child =>
-            React.isValidElement(child) && child.type === 'span' ? child : null
-          )}
-        </span>
-      )}
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement(child)) {
+          if (child.type === 'span') {
+            return null; // Don't render spans here
+          }
+          return React.cloneElement(child as React.ReactElement, {
+            className: 'w-6 h-6',
+          });
+        }
+        return child;
+      })}
+      <span
+        className={cn(
+          "overflow-hidden transition-all",
+          expanded ? "w-52 ml-3" : "w-0"
+        )}
+      >
+         {React.Children.map(children, (child) =>
+          React.isValidElement(child) && child.type === 'span' ? child : null
+        )}
+      </span>
     </div>
   );
   
-  const childEl = asChild ? <div {...props}>{buttonContent}</div> : <a {...props}>{buttonContent}</a>
+  const childEl = asChild ? <div {...props} ref={ref as any}>{buttonContent}</div> : <a {...props} ref={ref}>{buttonContent}</a>
 
   if (!expanded && tooltip) {
     return (
