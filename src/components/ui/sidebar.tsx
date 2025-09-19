@@ -129,21 +129,27 @@ const SidebarMenuButton = React.forwardRef<
       )}
       {...props}
     >
-      {children}
+       {React.Children.map(children, child =>
+        React.isValidElement(child) && child.type !== 'span' ? React.cloneElement(child as React.ReactElement, { className: 'w-6 h-6' }) : null
+      )}
       {expanded && (
-        <div className="flex-1 ml-3 whitespace-nowrap transition-all">
-          {(children as any)?.props?.children?.find((child: any) => typeof child === 'string' || child.type === 'span')}
-        </div>
+         <span className="flex-1 ml-3 whitespace-nowrap transition-all">
+          {React.Children.map(children, child =>
+            React.isValidElement(child) && child.type === 'span' ? child : null
+          )}
+        </span>
       )}
     </div>
   );
+  
+  const childEl = asChild ? <div>{buttonContent}</div> : <a>{buttonContent}</a>;
 
   if (!expanded && tooltip) {
     return (
       <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger asChild>
-            {asChild ? buttonContent : <a>{buttonContent}</a>}
+            {childEl}
           </TooltipTrigger>
           <TooltipContent side="right">
             {tooltip}
@@ -153,7 +159,7 @@ const SidebarMenuButton = React.forwardRef<
     );
   }
 
-  return asChild ? buttonContent : <a>{buttonContent}</a>;
+  return childEl;
 });
 SidebarMenuButton.displayName = "SidebarMenuButton"
 

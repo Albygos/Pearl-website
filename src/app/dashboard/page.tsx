@@ -57,8 +57,8 @@ export default function DashboardPage() {
           <Skeleton className="h-10 w-3/4 mx-auto mb-4" />
           <Skeleton className="h-6 w-1/2 mx-auto" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          {[...Array(6)].map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+          {[...Array(10)].map((_, i) => (
              <Card key={i}><CardContent className="p-0"><Skeleton className="aspect-[3/2] w-full" /></CardContent></Card>
           ))}
         </div>
@@ -85,7 +85,7 @@ export default function DashboardPage() {
       </div>
 
       {unitImages.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
           {unitImages.map((image) => (
             <Card key={image.id} className="overflow-hidden group shadow-lg hover:shadow-2xl transition-shadow duration-300">
               <CardContent className="p-0">

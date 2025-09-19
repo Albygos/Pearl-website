@@ -140,16 +140,16 @@ const SidebarMenuButton = React.forwardRef<
         React.isValidElement(child) && child.type !== 'span' ? React.cloneElement(child as React.ReactElement, { className: 'w-6 h-6' }) : null
       )}
       {expanded && (
-        <div className="flex-1 ml-3 whitespace-nowrap transition-all">
+        <span className="flex-1 ml-3 whitespace-nowrap transition-all">
           {React.Children.map(children, child =>
             React.isValidElement(child) && child.type === 'span' ? child : null
           )}
-        </div>
+        </span>
       )}
     </div>
   );
   
-  const childEl = asChild ? buttonContent : <a>{buttonContent}</a>
+  const childEl = asChild ? <div {...props}>{buttonContent}</div> : <a {...props}>{buttonContent}</a>
 
   if (!expanded && tooltip) {
     return (
