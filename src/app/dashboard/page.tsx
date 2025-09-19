@@ -2,17 +2,22 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { Card, CardContent } from '@/components/ui/card';
-import { getUnit, incrementUnitPhotoAccessCount } from '@/lib/services/units';
-import { getGalleryImages } from '@/lib/services/gallery';
-import { Skeleton } from '@/components/ui/skeleton';
-import type { Unit, GalleryImage } from '@/lib/types';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { getUnit, getUnits } from '@/lib/services/units';
+import type { Unit, EventScore } from '@/lib/types';
+import { Award, Trophy, Download } from 'lucide-react';
+
+const getTotalScore = (unit: Unit) => {
+  if (!unit.events) return 0;
+  return unit.events.reduce((total, event) => total + event.score, 0);
+};
 
 export default function DashboardPage() {
   const [unit, setUnit] = useState<Unit | null>(null);
-  const [unitImages, setUnitImages] = useState<GalleryImage[]>([]);
+  const [rank, setRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -26,24 +31,25 @@ export default function DashboardPage() {
 
       setLoading(true);
       try {
-        const [fetchedUnit, allImages] = await Promise.all([
+        const [fetchedUnit, allUnits] = await Promise.all([
           getUnit(loggedInUnitId),
-          getGalleryImages()
+          getUnits(),
         ]);
 
         if (fetchedUnit) {
           setUnit(fetchedUnit);
-          const imagesForUnit = allImages.filter(img => img.unitId === fetchedUnit.id).reverse();
-          setUnitImages(imagesForUnit);
-          if (imagesForUnit.length > 0) {
-            incrementUnitPhotoAccessCount(loggedInUnitId);
-          }
+          const sortedUnits = allUnits.sort((a, b) => getTotalScore(b) - getTotalScore(a));
+          const unitRank = sortedUnits.findIndex(u => u.id === fetchedUnit.id) + 1;
+          setRank(unitRank);
         } else {
-          handleSignOut();
+          // If unit not found (e.g., deleted), sign out
+          localStorage.removeItem('artfestlive_unit_id');
+          router.push('/login');
         }
       } catch (error) {
         console.error("Failed to load dashboard:", error);
-        handleSignOut();
+        localStorage.removeItem('artfestlive_unit_id');
+        router.push('/login');
       } finally {
         setLoading(false);
       }
@@ -51,82 +57,122 @@ export default function DashboardPage() {
 
     loadDashboard();
   }, [router]);
+
+  const handleDownloadCsv = () => {
+    if (!unit) return;
+
+    const headers = ['Event', 'Score'];
+    const rows = unit.events.map(event => `"${event.name}",${event.score}`);
+    const totalScoreRow = `"Total Score",${getTotalScore(unit)}`;
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += headers.join(",") + "\n";
+    csvContent += rows.join("\n");
+    csvContent += "\n" + totalScoreRow;
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${unit.name}_scorecard.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   
   const handleSignOut = () => {
     localStorage.removeItem('artfestlive_unit_id');
     router.push('/login');
   };
 
-  if (loading) {
+  if (loading || !unit) {
     return (
-       <div className="bg-accent/50">
-        <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center text-center sm:text-left mb-12 gap-4">
-              <div>
-                <Skeleton className="h-10 w-64 mx-auto sm:mx-0 mb-4" />
-                <Skeleton className="h-6 w-80 mx-auto sm:mx-0" />
-              </div>
-              <Skeleton className="h-10 w-24 mx-auto sm:mx-0" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-            {[...Array(4)].map((_, i) => (
-              <Card key={i} className="rounded-xl overflow-hidden">
-                <CardContent className="p-0">
-                    <Skeleton className="aspect-[4/3] w-full" />
-                  </CardContent>
-              </Card>
-            ))}
-          </div>
+      <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center mb-8">
+            <Skeleton className="h-10 w-64" />
+            <Skeleton className="h-10 w-24" />
         </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+            <Skeleton className="h-28 w-full" />
+            <Skeleton className="h-28 w-full" />
+        </div>
+        <Skeleton className="h-80 w-full" />
       </div>
     );
   }
 
-  if (!unit) {
-    return null;
-  }
-
   return (
     <div className="bg-accent/50 min-h-full">
-      <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center text-center sm:text-left mb-12 gap-4">
+        <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center text-center sm:text-left mb-8 gap-4">
           <div>
             <h1 className="text-3xl md:text-5xl font-headline font-bold mb-2">
               Welcome, {unit.name}!
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto sm:mx-0">
-              Here are the photos captured of your amazing work.
-            </p>
+            <p className="text-lg text-muted-foreground">Here's your current performance summary.</p>
           </div>
           <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>
         </div>
 
-        {unitImages.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-            {unitImages.map((image) => (
-               <Card key={image.id} className="overflow-hidden group shadow-md hover:shadow-xl transition-shadow duration-300 border-none rounded-xl">
-                <CardContent className="p-0">
-                  <div className="aspect-w-4 aspect-h-3">
-                     <Image
-                      src={image.src}
-                      alt={image.alt}
-                      fill
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                      data-ai-hint={image.aiHint}
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-24 border-2 border-dashed rounded-lg mt-16">
-            <p className="text-muted-foreground text-xl">No photos have been assigned to your unit yet.</p>
-            <p className="text-md text-muted-foreground mt-2">Check back soon!</p>
-          </div>
-        )}
-      </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Your Rank</CardTitle>
+              <Trophy className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {rank ? `#${rank}` : 'N/A'}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Based on total score across all units
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Score</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{getTotalScore(unit)}</div>
+              <p className="text-xs text-muted-foreground">
+                Sum of scores from all events
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card className="shadow-lg border-none overflow-hidden rounded-xl">
+            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                    <CardTitle className="text-2xl font-headline">Your Scorecard</CardTitle>
+                    <CardDescription>A detailed breakdown of your points for each event.</CardDescription>
+                </div>
+                <Button onClick={handleDownloadCsv}>
+                    <Download className="mr-2"/>
+                    Download Scorecard (CSV)
+                </Button>
+            </CardHeader>
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Event</TableHead>
+                            <TableHead className="text-right">Score</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {unit.events.map((event) => (
+                            <TableRow key={event.name}>
+                                <TableCell className="font-medium">{event.name}</TableCell>
+                                <TableCell className="text-right font-bold text-primary">{event.score}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+        </div>
     </div>
   );
 }

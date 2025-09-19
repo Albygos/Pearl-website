@@ -31,16 +31,65 @@ import {
   ChevronDown,
   LogOut,
   CalendarPlus,
+  GalleryHorizontal,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/gallery', label: 'Gallery' },
-  { href: '/dashboard', label: 'My Dashboard' },
-];
+const MainNav = ({ isUnitLoggedIn, pathname }: { isUnitLoggedIn: boolean, pathname: string }) => {
+  const navLinks = [
+    { href: '/', label: 'Home' },
+    { href: '/gallery', label: 'Gallery' },
+    { href: isUnitLoggedIn ? '/dashboard' : '/login', label: 'My Dashboard' },
+  ];
+
+  return (
+    <>
+      {navLinks.map((link) => (
+        <Button key={link.label} variant="ghost" asChild className={cn(pathname === link.href && 'font-bold')}>
+          <Link
+            href={link.href}
+            className={cn(
+              'text-sm transition-colors',
+              pathname === link.href ? 'text-primary' : 'text-muted-foreground'
+            )}
+          >
+            {link.label}
+          </Link>
+        </Button>
+      ))}
+    </>
+  );
+};
+
+const MobileMainNav = ({ isUnitLoggedIn, pathname }: { isUnitLoggedIn: boolean, pathname: string }) => {
+   const navLinks = [
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/gallery', label: 'Gallery', icon: GalleryHorizontal },
+    { href: isUnitLoggedIn ? '/dashboard' : '/login', label: 'My Dashboard', icon: LayoutDashboard },
+  ];
+
+  return (
+    <>
+       {navLinks.map((link) => (
+          <Link
+            key={link.label}
+            href={link.href}
+            className={cn(
+              'text-lg font-medium flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-accent',
+              pathname === link.href ? 'bg-accent text-primary' : ''
+            )}
+          >
+            <link.icon className="h-5 w-5" />
+            {link.label}
+          </Link>
+        ))}
+    </>
+  );
+}
+
 
 const adminNavLinks = [
   { href: '/admin', label: 'Dashboard', icon: Shield },
@@ -65,7 +114,16 @@ export default function Header() {
      const unsubscribe = onAuthStateChanged(auth, (user) => {
       setIsAdminLoggedIn(!!user);
     });
-    return () => unsubscribe();
+    
+    const handleStorageChange = () => {
+       setIsUnitLoggedIn(!!localStorage.getItem('artfestlive_unit_id'));
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      unsubscribe();
+      window.removeEventListener('storage', handleStorageChange);
+    }
   }, [pathname]);
 
   const handleUnitSignOut = () => {
@@ -86,19 +144,7 @@ export default function Header() {
         <Logo />
 
         <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Button key={link.href} variant="ghost" asChild className={cn(pathname === link.href && 'font-bold')}>
-              <Link
-                href={link.href}
-                className={cn(
-                  'text-sm transition-colors',
-                   pathname === link.href ? 'text-primary' : 'text-muted-foreground'
-                )}
-              >
-                {link.label}
-              </Link>
-            </Button>
-          ))}
+          <MainNav isUnitLoggedIn={isUnitLoggedIn} pathname={pathname} />
         </nav>
 
         <div className="flex items-center gap-2">
@@ -167,17 +213,7 @@ export default function Header() {
                     {isAdminPage ? (
                       <>
                         <p className="text-sm font-medium text-muted-foreground px-2">Site</p>
-                         {navLinks.map((link) => (
-                          <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                              'text-lg font-medium flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-accent'
-                            )}
-                          >
-                            {link.label}
-                          </Link>
-                        ))}
+                        <MobileMainNav isUnitLoggedIn={isUnitLoggedIn} pathname={pathname} />
                         <hr />
                         {isAdminLoggedIn && (
                           <>
@@ -197,25 +233,18 @@ export default function Header() {
                               {link.label}
                             </Link>
                           ))}
+                           <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleAdminSignOut} className="text-lg font-medium">
+                                <LogOut className="mr-3 h-5 w-5" />
+                                <span>Sign Out</span>
+                            </DropdownMenuItem>
                           </>
                         )}
                       </>
                     ) : (
                       <>
-                        {navLinks.map((link) => (
-                          <Link
-                            key={link.href}
-                            href={link.href}
-                            className={cn(
-                              'text-lg font-medium transition-colors hover:text-primary',
-                              pathname === link.href
-                                ? 'text-primary'
-                                : ''
-                            )}
-                          >
-                            {link.label}
-                          </Link>
-                        ))}
+                        <MobileMainNav isUnitLoggedIn={isUnitLoggedIn} pathname={pathname} />
+                        <hr/>
                         <Button asChild variant="outline">
                           <Link href="/admin">
                             <Shield className="mr-2 h-4 w-4" />

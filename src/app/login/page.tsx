@@ -36,7 +36,7 @@ export default function LoginPage() {
       const unit = await getUnitByCredential(credentialId.trim());
       if (unit) {
         localStorage.setItem('artfestlive_unit_id', unit.id);
-        router.push('/gallery');
+        router.push('/dashboard');
       } else {
         toast({
           title: 'Sign-in Failed',
@@ -62,7 +62,7 @@ export default function LoginPage() {
         <CardHeader>
           <CardTitle className="text-2xl font-headline">Unit Sign-in</CardTitle>
           <CardDescription>
-            Enter your credential to access your unit's gallery.
+            Enter your credential to access your unit's dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent>
