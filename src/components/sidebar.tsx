@@ -204,13 +204,13 @@ const SidebarInset = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, children, ...props }, ref) => {
   const { expanded } = useSidebar()
+  const isMobile = useIsMobile()
   return (
     <main
       ref={ref}
       className={cn(
         "transition-all",
-        "md:ml-20",
-        expanded && "md:ml-64",
+        !isMobile && (expanded ? "ml-64" : "ml-20"),
         className
       )}
       {...props}
