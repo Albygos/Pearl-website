@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import { getUnit } from '@/lib/services/units';
+import { getUnit, incrementUnitPhotoAccessCount } from '@/lib/services/units';
 import { getGalleryImages } from '@/lib/services/gallery';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { Unit, GalleryImage } from '@/lib/types';
@@ -25,21 +25,31 @@ export default function DashboardPage() {
       }
 
       setLoading(true);
-      const [fetchedUnit, allImages] = await Promise.all([
-        getUnit(loggedInUnitId),
-        getGalleryImages()
-      ]);
+      try {
+        const [fetchedUnit, allImages] = await Promise.all([
+          getUnit(loggedInUnitId),
+          getGalleryImages()
+        ]);
 
-      if (fetchedUnit) {
-        setUnit(fetchedUnit);
-        setUnitImages(allImages.filter(img => img.unitId === fetchedUnit.id));
-      } else {
-        // If unit not found, clear storage and redirect
-        localStorage.removeItem('artfestlive_unit_id');
-        router.push('/login');
-        return;
+        if (fetchedUnit) {
+          setUnit(fetchedUnit);
+          const imagesForUnit = allImages.filter(img => img.unitId === fetchedUnit.id);
+          setUnitImages(imagesForUnit);
+          // Increment photo access count when the dashboard is loaded
+          if (imagesForUnit.length > 0) {
+            await incrementUnitPhotoAccessCount(loggedInUnitId);
+          }
+        } else {
+          // If unit not found, clear storage and redirect
+          handleSignOut();
+        }
+      } catch (error) {
+        console.error("Failed to load dashboard:", error);
+        // Potentially handle this with a toast message
+        handleSignOut();
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     loadDashboard();
@@ -67,7 +77,7 @@ export default function DashboardPage() {
   }
 
   if (!unit) {
-    return null; // or a message indicating no unit data
+    return null; // Should be redirected, but as a fallback.
   }
 
   return (
@@ -105,7 +115,7 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="text-center py-16 border-2 border-dashed rounded-lg">
-          <p className="text-muted-foreground text-lg">No photos available for your unit yet.</p>
+          <p className="text-muted-foreground text-lg">No photos have been assigned to your unit yet.</p>
           <p className="text-sm text-muted-foreground mt-2">Check back soon!</p>
         </div>
       )}

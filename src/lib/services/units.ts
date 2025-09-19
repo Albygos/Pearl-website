@@ -1,5 +1,5 @@
 import { database } from '@/lib/firebase';
-import { ref, get, set, child, push, remove } from 'firebase/database';
+import { ref, get, set, child, push, remove, runTransaction } from 'firebase/database';
 import type { Unit } from '@/lib/types';
 
 const dbRef = ref(database);
@@ -63,6 +63,18 @@ export async function updateUnitScore(id: string, newScore: number): Promise<voi
     } catch (error) {
         console.error("Error updating score:", error);
         throw error;
+    }
+}
+
+export async function incrementUnitPhotoAccessCount(id: string): Promise<void> {
+    try {
+        const unitRef = child(dbRef, `units/${id}/photoAccessCount`);
+        await runTransaction(unitRef, (currentCount) => {
+            return (currentCount || 0) + 1;
+        });
+    } catch (error) {
+        console.error("Error incrementing photo access count:", error);
+        // Don't throw, as this is not a critical failure
     }
 }
 
