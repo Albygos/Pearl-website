@@ -166,11 +166,11 @@ export default function Home() {
                         </TableCell>
                         <TableCell className="font-semibold text-sm sm:text-base px-2 sm:px-4">{unit.name}</TableCell>
                         {events.map(event => (
-                          <TableCell key={event.id} className={`text-center text-foreground font-bold text-sm sm:text-base transition-all duration-1000 px-2 sm:px-4 ${highlightedCells[`${unit.id}-${event.name}`] ? 'animate-flash' : ''}`}>
+                          <TableCell key={event.id} className={`text-center text-foreground font-bold transition-all duration-1000 px-2 sm:px-4 ${highlightedCells[`${unit.id}-${event.name}`] ? 'animate-flash' : ''}`}>
                             {unit.events?.find(e => e.name === event.name)?.score ?? 0}
                           </TableCell>
                         ))}
-                        <TableCell className="text-right text-primary font-bold text-sm sm:text-base px-2 sm:px-4">{getTotalScore(unit)}</TableCell>
+                        <TableCell className="text-right text-primary font-bold px-2 sm:px-4">{getTotalScore(unit)}</TableCell>
                       </TableRow>
                     ))}
                     {filteredUnits.length === 0 && !loading && (
@@ -198,10 +198,10 @@ export default function Home() {
           <section className="max-w-6xl mx-auto mt-12 animate-in" style={{ animationDelay: '500ms', animationFillMode: 'backwards' }}>
             <h2 className="text-3xl font-headline font-bold text-center mb-8">Top Megalas</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {filteredUnits.slice(0, 10).map((unit, index) => (
+              {filteredUnits.map((unit, index) => (
                 <Card key={unit.id} className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader className="flex flex-row items-center gap-4">
-                    <div className="text-4xl font-bold text-primary">#{index + 1}</div>
+                    <div className="text-4xl font-bold text-primary">{index + 1}</div>
                     <div>
                       <CardTitle className="text-xl">{unit.name}</CardTitle>
                       <CardDescription>Current Rank: {index + 1}</CardDescription>

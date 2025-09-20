@@ -184,8 +184,9 @@ export default function Header() {
               </DropdownMenu>
             )
           ) : isUnitLoggedIn ? (
-            <Button variant="outline" size="icon" onClick={handleUnitSignOut}>
-              <LogOut />
+            <Button variant="outline" size="sm" onClick={handleUnitSignOut}>
+              <LogOut className="mr-2" />
+              Sign Out
             </Button>
           ) : (
              pathname !== '/login' && !pathname.startsWith('/admin') && (
@@ -244,13 +245,6 @@ export default function Header() {
                     ) : (
                       <>
                         <MobileMainNav isUnitLoggedIn={isUnitLoggedIn} pathname={pathname} />
-                        <hr/>
-                        <Button asChild variant="outline">
-                          <Link href="/admin">
-                            <Shield className="mr-2 h-4 w-4" />
-                            Admin Panel
-                          </Link>
-                        </Button>
                       </>
                     )}
                   </nav>
