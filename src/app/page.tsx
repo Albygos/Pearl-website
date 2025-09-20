@@ -118,7 +118,7 @@ export default function Home() {
                       {events.map(event => (
                         <TableHead key={event.id} className="text-center font-bold text-foreground">{event.name}</TableHead>
                       ))}
-                      <TableHead className="text-right text-base font-bold text-foreground">Total Score</TableHead>
+                      <TableHead className="text-right text-base font-bold text-primary">Total Score</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -165,7 +165,7 @@ export default function Home() {
           <section className="max-w-6xl mx-auto mt-12 animate-in" style={{ animationDelay: '500ms', animationFillMode: 'backwards' }}>
             <h2 className="text-3xl font-headline font-bold text-center mb-8">Top Megalas</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {filteredUnits.slice(0, 3).map((unit, index) => (
+              {filteredUnits.slice(0, 10).map((unit, index) => (
                 <Card key={unit.id} className="shadow-md hover:shadow-lg transition-shadow">
                   <CardHeader className="flex flex-row items-center gap-4">
                     <div className="text-4xl font-bold text-primary">#{index + 1}</div>
