@@ -137,7 +137,7 @@ export default function Home() {
                             {unit.events?.find(e => e.name === event.name)?.score ?? 0}
                           </TableCell>
                         ))}
-                        <TableCell className="text-right text-primary text-xl sm:text-2xl font-bold px-2 sm:px-4">{getTotalScore(unit)}</TableCell>
+                        <TableCell className="text-right text-primary text-sm sm:text-base font-bold px-2 sm:px-4">{getTotalScore(unit)}</TableCell>
                       </TableRow>
                     ))}
                     {filteredUnits.length === 0 && !loading && (
