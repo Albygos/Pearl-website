@@ -9,6 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getUnit, getUnits } from '@/lib/services/units';
 import type { Unit, EventScore } from '@/lib/types';
 import { Award, Trophy, Download } from 'lucide-react';
+import { database } from '@/lib/firebase';
+import { ref, onValue } from 'firebase/database';
 
 const getTotalScore = (unit: Unit) => {
   if (!unit.events) return 0;
@@ -17,46 +19,60 @@ const getTotalScore = (unit: Unit) => {
 
 export default function DashboardPage() {
   const [unit, setUnit] = useState<Unit | null>(null);
+  const [allUnits, setAllUnits] = useState<Unit[]>([]);
   const [rank, setRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    async function loadDashboard() {
-      const loggedInUnitId = localStorage.getItem('artfestlive_unit_id');
-      if (!loggedInUnitId) {
-        router.push('/login');
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const [fetchedUnit, allUnits] = await Promise.all([
-          getUnit(loggedInUnitId),
-          getUnits(),
-        ]);
-
-        if (fetchedUnit) {
-          setUnit(fetchedUnit);
-          const sortedUnits = allUnits.sort((a, b) => getTotalScore(b) - getTotalScore(a));
-          const unitRank = sortedUnits.findIndex(u => u.id === fetchedUnit.id) + 1;
-          setRank(unitRank);
-        } else {
-          // If unit not found (e.g., deleted), sign out
-          localStorage.removeItem('artfestlive_unit_id');
-          router.push('/login');
-        }
-      } catch (error) {
-        console.error("Failed to load dashboard:", error);
-        localStorage.removeItem('artfestlive_unit_id');
-        router.push('/login');
-      } finally {
-        setLoading(false);
-      }
+    const loggedInUnitId = localStorage.getItem('artfestlive_unit_id');
+    if (!loggedInUnitId) {
+      router.push('/login');
+      return;
     }
 
-    loadDashboard();
+    setLoading(true);
+
+    const unitRef = ref(database, `units/${loggedInUnitId}`);
+    const allUnitsRef = ref(database, 'units');
+
+    const unsubscribeUnit = onValue(unitRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const fetchedUnit = { id: snapshot.key, ...snapshot.val() };
+        setUnit(fetchedUnit);
+      } else {
+        // If unit not found (e.g., deleted), sign out
+        localStorage.removeItem('artfestlive_unit_id');
+        router.push('/login');
+      }
+      setLoading(false);
+    });
+
+    const unsubscribeAllUnits = onValue(allUnitsRef, (snapshot) => {
+        if(snapshot.exists()) {
+            const unitsData = snapshot.val();
+            const unitsArray = Object.keys(unitsData).map(key => ({
+                id: key,
+                ...unitsData[key]
+            }));
+            setAllUnits(unitsArray);
+        }
+    });
+
+    return () => {
+      unsubscribeUnit();
+      unsubscribeAllUnits();
+    };
   }, [router]);
+
+  useEffect(() => {
+    if (unit && allUnits.length > 0) {
+      const sortedUnits = [...allUnits].sort((a, b) => getTotalScore(b) - getTotalScore(a));
+      const unitRank = sortedUnits.findIndex(u => u.id === unit.id) + 1;
+      setRank(unitRank);
+    }
+  }, [unit, allUnits]);
+
 
   const handleDownloadCsv = () => {
     if (!unit) return;
@@ -103,7 +119,7 @@ export default function DashboardPage() {
   return (
     <div className="bg-accent/50 min-h-full">
         <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row justify-between sm:items-center text-center sm:text-left mb-8 gap-4">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center text-center sm:text-left mb-8 gap-4 animate-in">
           <div>
             <h1 className="text-3xl md:text-5xl font-headline font-bold mb-2">
               Welcome, {unit.name}!
@@ -113,7 +129,7 @@ export default function DashboardPage() {
           <Button variant="outline" onClick={handleSignOut}>Sign Out</Button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8 animate-in" style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Your Rank</CardTitle>
@@ -142,7 +158,7 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <Card className="shadow-lg border-none overflow-hidden rounded-xl">
+        <Card className="shadow-lg border-none overflow-hidden rounded-xl animate-in" style={{ animationDelay: '400ms', animationFillMode: 'backwards' }}>
             <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div>
                     <CardTitle className="text-2xl font-headline">Your Scorecard</CardTitle>
@@ -162,7 +178,7 @@ export default function DashboardPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {unit.events.map((event) => (
+                        {unit.events && unit.events.map((event) => (
                             <TableRow key={event.name}>
                                 <TableCell className="font-medium">{event.name}</TableCell>
                                 <TableCell className="text-right font-bold text-primary">{event.score}</TableCell>

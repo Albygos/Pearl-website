@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getGalleryImages } from '@/lib/services/gallery';
 import type { GalleryImage } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { incrementUnitPhotoAccessCount } from '@/lib/services/units';
 
 export default function GalleryPage() {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
@@ -26,6 +27,8 @@ export default function GalleryPage() {
         const images = await getGalleryImages();
         // Show newest images first
         setGalleryImages(images.reverse());
+        // Increment access count, but don't block for it
+        incrementUnitPhotoAccessCount(loggedInUnitId);
       } catch (error) {
         console.error("Failed to load gallery images:", error);
       } finally {
@@ -60,14 +63,14 @@ export default function GalleryPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-headline font-bold mb-4">Event Gallery</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            A visual journey through the highlights of ArtFestLive.
+            A visual journey through the highlights of Pearl 2025.
           </p>
         </div>
 
         {galleryImages.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-            {galleryImages.map((image) => (
-              <div key={image.id} className="group relative aspect-w-1 aspect-h-1 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300">
+            {galleryImages.map((image, index) => (
+              <div key={image.id} className="group relative aspect-w-1 aspect-h-1 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 animate-in" style={{ animationDelay: `${index * 75}ms`, animationFillMode: 'backwards' }}>
                 <Image
                   src={image.src}
                   alt={image.alt}

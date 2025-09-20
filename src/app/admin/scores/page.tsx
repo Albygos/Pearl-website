@@ -33,6 +33,9 @@ import type { Unit, EventScore, AppEvent } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Download } from 'lucide-react';
+import { database } from '@/lib/firebase';
+import { ref, onValue } from 'firebase/database';
+
 
 type SelectedScore = {
   unit: Unit;
@@ -55,16 +58,43 @@ export default function ManageScoresPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      const [fetchedUnits, fetchedEvents] = await Promise.all([getUnits(), getEvents()]);
-      fetchedUnits.sort((a,b) => getTotalScore(b) - getTotalScore(a));
-      setUnits(fetchedUnits);
-      setEvents(fetchedEvents);
-      setLoading(false);
-    }
-    fetchData();
-  }, []);
+    setLoading(true);
+    const unitsRef = ref(database, 'units');
+    const eventsRef = ref(database, 'events');
+
+    const unsubscribeUnits = onValue(unitsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const unitsData = snapshot.val();
+            const unitsArray = Object.keys(unitsData).map(key => ({
+                id: key,
+                ...unitsData[key]
+            }));
+            setUnits(unitsArray);
+        } else {
+            setUnits([]);
+        }
+        setLoading(false);
+    });
+
+    const unsubscribeEvents = onValue(eventsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const eventsData = snapshot.val();
+            const eventsArray = Object.keys(eventsData).map(key => ({
+                id: key,
+                ...eventsData[key]
+            }));
+            setEvents(eventsArray);
+        } else {
+            setEvents([]);
+        }
+    });
+
+    return () => {
+        unsubscribeUnits();
+        unsubscribeEvents();
+    };
+}, []);
+
 
   const filteredUnits = useMemo(() => {
     const sorted = [...units].sort((a,b) => getTotalScore(b) - getTotalScore(a));
@@ -85,14 +115,7 @@ export default function ManageScoresPage() {
       const scoreValue = parseInt(newScore, 10);
       try {
         await updateUnitScore(selectedScore.unit.id, selectedScore.event.name, scoreValue);
-        const updatedUnits = units.map((u) => {
-          if (u.id === selectedScore.unit.id) {
-            const updatedEvents = u.events.map(e => e.name === selectedScore.event.name ? { ...e, score: scoreValue } : e);
-            return { ...u, events: updatedEvents };
-          }
-          return u;
-        });
-        setUnits(updatedUnits);
+        // No local state update needed, real-time listener will handle it
         toast({
           title: 'Score Updated',
           description: `${selectedScore.unit.name}'s score for ${selectedScore.event.name} has been updated to ${newScore}.`,
@@ -162,7 +185,7 @@ export default function ManageScoresPage() {
             </Button>
         </div>
       </header>
-      <Card className="shadow-sm">
+      <Card className="shadow-sm hover:shadow-lg transition-shadow">
         <CardContent className="pt-6">
           {loading ? (
              <div className="space-y-4">

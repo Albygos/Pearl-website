@@ -9,6 +9,8 @@ import { getEvents } from '@/lib/services/events';
 import type { Unit, AppEvent } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { database } from '@/lib/firebase';
+import { ref, onValue } from 'firebase/database';
 
 
 const getTotalScore = (unit: Unit) => {
@@ -23,17 +25,42 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      const [fetchedUnits, fetchedEvents] = await Promise.all([getUnits(), getEvents()]);
-      setUnits(fetchedUnits);
-      setEvents(fetchedEvents);
-      setLoading(false);
-    }
-    fetchData();
-    
-    // Optional: set up a real-time listener if using Firebase Realtime DB
-    // For now, we fetch once.
+    setLoading(true);
+    const unitsRef = ref(database, 'units');
+    const eventsRef = ref(database, 'events');
+
+    const unsubscribeUnits = onValue(unitsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const unitsData = snapshot.val();
+            const unitsArray = Object.keys(unitsData).map(key => ({
+                id: key,
+                ...unitsData[key]
+            }));
+            setUnits(unitsArray);
+        } else {
+            setUnits([]);
+        }
+        setLoading(false);
+    });
+
+    const unsubscribeEvents = onValue(eventsRef, (snapshot) => {
+        if (snapshot.exists()) {
+            const eventsData = snapshot.val();
+            const eventsArray = Object.keys(eventsData).map(key => ({
+                id: key,
+                ...eventsData[key]
+            }));
+            setEvents(eventsArray);
+        } else {
+            setEvents([]);
+        }
+    });
+
+
+    return () => {
+        unsubscribeUnits();
+        unsubscribeEvents();
+    };
   }, []);
 
   const filteredUnits = useMemo(() => {
@@ -49,15 +76,15 @@ export default function Home() {
   return (
     <div className="bg-background min-h-screen">
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <section className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-headline font-bold mb-4 tracking-tight">ArtFestLive</h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+        <section className="text-center mb-12 animate-in" style={{ animationDelay: '100ms', animationFillMode: 'backwards' }}>
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-headline font-extrabold mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-yellow-500">Pearl 2025</h1>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto animate-in" style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}>
             Welcome to the heart of creativity! Witness the scores unfold in real-time and celebrate the spirit of art.
           </p>
         </section>
 
-        <div className="max-w-6xl mx-auto">
-          <Card className="shadow-lg border-2 border-primary/10 overflow-hidden rounded-xl">
+        <div className="max-w-6xl mx-auto animate-in" style={{ animationDelay: '300ms', animationFillMode: 'backwards' }}>
+          <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-primary/10 overflow-hidden rounded-xl">
             <CardHeader className="text-center bg-muted/30 p-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
                 <div>
                     <CardTitle className="text-3xl font-headline">Live Scoreboard</CardTitle>

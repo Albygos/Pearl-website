@@ -31,7 +31,7 @@ export default async function AdminDashboardPage() {
     <div className="p-4 sm:p-6 lg:p-8 bg-background min-h-full">
       <header className="mb-8 max-w-7xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-headline font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Welcome, administrator. Here's a summary of ArtFestLive.</p>
+        <p className="text-muted-foreground">Welcome, administrator. Here's a summary of Pearl 2025.</p>
       </header>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
@@ -97,6 +97,28 @@ export default async function AdminDashboardPage() {
           <CardContent>
             <Button asChild>
               <Link href="/admin/units">Go to Megalas <ArrowRight className="ml-2" /></Link>
+            </Button>
+          </CardContent>
+        </Card>
+         <Card className="shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle>Manage Gallery</CardTitle>
+            <CardDescription>Upload images to the event gallery for megalas to view.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/admin/gallery">Go to Gallery <ArrowRight className="ml-2" /></Link>
+            </Button>
+          </CardContent>
+        </Card>
+         <Card className="shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle>Manage Events</CardTitle>
+            <CardDescription>Add or remove event categories for the competition.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/admin/events">Go to Events <ArrowRight className="ml-2" /></Link>
             </Button>
           </CardContent>
         </Card>
