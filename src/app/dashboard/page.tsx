@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getUnit, getUnits } from '@/lib/services/units';
 import type { Unit, EventScore } from '@/lib/types';
-import { Award, Trophy, Download, LogOut } from 'lucide-react';
+import { Award, Trophy, Download } from 'lucide-react';
 import { database } from '@/lib/firebase';
 import { ref, onValue } from 'firebase/database';
 
@@ -95,11 +95,6 @@ export default function DashboardPage() {
     document.body.removeChild(link);
   };
   
-  const handleSignOut = () => {
-    localStorage.removeItem('artfestlive_unit_id');
-    router.push('/login');
-  };
-
   if (loading || !unit) {
     return (
       <div className="container mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -127,9 +122,6 @@ export default function DashboardPage() {
             </h1>
             <p className="text-lg text-muted-foreground">Here's your current performance summary.</p>
           </div>
-          <Button variant="outline" size="icon" onClick={handleSignOut}>
-            <LogOut />
-          </Button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8 animate-in" style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}>
