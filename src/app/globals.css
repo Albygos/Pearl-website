@@ -4,16 +4,16 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 60 90% 95%; /* Minimal Yellow */
     --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
+    --card: 60 90% 98%; /* Lighter Yellow for cards */
     --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
+    --popover: 60 90% 98%; /* Lighter Yellow for popovers */
     --popover-foreground: 240 10% 3.9%;
     --primary: 0 84% 60%; /* Red */
     --primary-foreground: 0 0% 98%;
-    --secondary: 60 90% 95%; /* Light Yellow */
-    --secondary-foreground: 60 50% 20%;
+    --secondary: 240 5% 96%; /* Adjusted secondary */
+    --secondary-foreground: 240 10% 3.9%;
     --muted: 240 5% 96%;
     --muted-foreground: 240 4% 46%;
     --accent: 48 96% 58%; /* Yellow */
