@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search } from 'lucide-react';
+import { Search, Trophy } from 'lucide-react';
 import { getUnits } from '@/lib/services/units';
 import { getEvents } from '@/lib/services/events';
 import type { Unit, AppEvent } from '@/lib/types';
@@ -160,6 +160,32 @@ export default function Home() {
             </CardContent>
           </Card>
         </div>
+
+        {filteredUnits.length > 0 && (
+          <section className="max-w-6xl mx-auto mt-12 animate-in" style={{ animationDelay: '500ms', animationFillMode: 'backwards' }}>
+            <h2 className="text-3xl font-headline font-bold text-center mb-8">Top Megalas</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {filteredUnits.slice(0, 3).map((unit, index) => (
+                <Card key={unit.id} className="shadow-md hover:shadow-lg transition-shadow">
+                  <CardHeader className="flex flex-row items-center gap-4">
+                    <div className="text-4xl font-bold text-primary">#{index + 1}</div>
+                    <div>
+                      <CardTitle className="text-xl">{unit.name}</CardTitle>
+                      <CardDescription>Current Rank: {index + 1}</CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between text-lg">
+                      <span className="text-muted-foreground">Total Score</span>
+                      <span className="font-bold text-primary">{getTotalScore(unit)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
+
       </div>
     </div>
   );
