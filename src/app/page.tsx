@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Trophy } from 'lucide-react';
-import { getUnits } from '@/lib/services/units';
-import { getEvents } from '@/lib/services/events';
-import type { Unit, AppEvent } from '@/lib/types';
+import { Search } from 'lucide-react';
+import type { Unit, AppEvent, EventScore } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { database } from '@/lib/firebase';
@@ -23,6 +21,8 @@ export default function Home() {
   const [events, setEvents] = useState<AppEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [highlightedCells, setHighlightedCells] = useState<Record<string, boolean>>({});
+  const prevUnitsRef = useRef<Unit[]>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -32,13 +32,46 @@ export default function Home() {
     const unsubscribeUnits = onValue(unitsRef, (snapshot) => {
         if (snapshot.exists()) {
             const unitsData = snapshot.val();
-            const unitsArray = Object.keys(unitsData).map(key => ({
+            const unitsArray: Unit[] = Object.keys(unitsData).map(key => ({
                 id: key,
                 ...unitsData[key]
             }));
+
+            if (prevUnitsRef.current.length > 0) {
+              const newHighlights: Record<string, boolean> = {};
+              unitsArray.forEach(unit => {
+                const prevUnit = prevUnitsRef.current.find(u => u.id === unit.id);
+                if (prevUnit && unit.events) {
+                  unit.events.forEach(eventScore => {
+                    const prevEventScore = prevUnit.events.find(e => e.name === eventScore.name);
+                    if (!prevEventScore || prevEventScore.score !== eventScore.score) {
+                       const key = `${unit.id}-${eventScore.name}`;
+                       newHighlights[key] = true;
+                    }
+                  });
+                }
+              });
+              
+              if(Object.keys(newHighlights).length > 0) {
+                setHighlightedCells(prev => ({...prev, ...newHighlights}));
+                Object.keys(newHighlights).forEach(key => {
+                    setTimeout(() => {
+                        setHighlightedCells(prev => {
+                            const newPrev = {...prev};
+                            delete newPrev[key];
+                            return newPrev;
+                        });
+                    }, 60000);
+                });
+              }
+            }
+            
             setUnits(unitsArray);
+            prevUnitsRef.current = unitsArray;
+
         } else {
             setUnits([]);
+            prevUnitsRef.current = [];
         }
         setLoading(false);
     });
@@ -133,11 +166,11 @@ export default function Home() {
                         </TableCell>
                         <TableCell className="font-semibold text-sm sm:text-base px-2 sm:px-4">{unit.name}</TableCell>
                         {events.map(event => (
-                          <TableCell key={event.id} className="text-center text-foreground font-bold text-sm sm:text-base px-2 sm:px-4">
+                          <TableCell key={event.id} className={`text-center text-foreground font-bold text-sm sm:text-base transition-all duration-1000 px-2 sm:px-4 ${highlightedCells[`${unit.id}-${event.name}`] ? 'animate-flash' : ''}`}>
                             {unit.events?.find(e => e.name === event.name)?.score ?? 0}
                           </TableCell>
                         ))}
-                        <TableCell className="text-right text-primary font-bold px-2 sm:px-4">{getTotalScore(unit)}</TableCell>
+                        <TableCell className="text-right text-primary font-bold text-sm sm:text-base px-2 sm:px-4">{getTotalScore(unit)}</TableCell>
                       </TableRow>
                     ))}
                     {filteredUnits.length === 0 && !loading && (

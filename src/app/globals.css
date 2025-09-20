@@ -78,4 +78,17 @@
       transform: translateY(0);
     }
   }
+
+  .animate-flash {
+    animation: flash 1s ease-out;
+  }
+
+  @keyframes flash {
+    0% {
+      background-color: hsl(var(--primary) / 0.3);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
 }
