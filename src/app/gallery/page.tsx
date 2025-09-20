@@ -26,7 +26,7 @@ export default function GalleryPage() {
     async function checkAuthAndLoadImages() {
       const loggedInUnitId = localStorage.getItem('artfestlive_unit_id');
       if (!loggedInUnitId) {
-        router.push('/login');
+        router.push('/login?returnTo=/gallery');
         return;
       }
       

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,10 +16,11 @@ import { getUnitByCredential } from '@/lib/services/units';
 import { useToast } from '@/hooks/use-toast';
 import { Loader } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const [credentialId, setCredentialId] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
 
   const handleSignIn = async () => {
@@ -36,7 +37,8 @@ export default function LoginPage() {
       const unit = await getUnitByCredential(credentialId.trim());
       if (unit) {
         localStorage.setItem('artfestlive_unit_id', unit.id);
-        router.push('/dashboard');
+        const returnTo = searchParams.get('returnTo');
+        router.push(returnTo || '/dashboard');
       } else {
         toast({
           title: 'Sign-in Failed',
@@ -88,4 +90,13 @@ export default function LoginPage() {
       </Card>
     </div>
   );
+}
+
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
+  )
 }

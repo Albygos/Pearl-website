@@ -27,7 +27,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const loggedInUnitId = localStorage.getItem('artfestlive_unit_id');
     if (!loggedInUnitId) {
-      router.push('/login');
+      router.push('/login?returnTo=/dashboard');
       return;
     }
 
@@ -43,7 +43,7 @@ export default function DashboardPage() {
       } else {
         // If unit not found (e.g., deleted), sign out
         localStorage.removeItem('artfestlive_unit_id');
-        router.push('/login');
+        router.push('/login?returnTo=/dashboard');
       }
       setLoading(false);
     });
