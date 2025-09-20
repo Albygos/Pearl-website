@@ -113,12 +113,12 @@ export default function Home() {
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent text-xs uppercase tracking-wider">
-                      <TableHead className="w-24 text-center">Rank</TableHead>
-                      <TableHead>Megala Name</TableHead>
+                      <TableHead className="w-24 text-center font-bold">Rank</TableHead>
+                      <TableHead className="font-bold">Megala Name</TableHead>
                       {events.map(event => (
-                        <TableHead key={event.id} className="text-center">{event.name}</TableHead>
+                        <TableHead key={event.id} className="text-center font-bold">{event.name}</TableHead>
                       ))}
-                      <TableHead className="text-right text-base">Total Score</TableHead>
+                      <TableHead className="text-right text-base font-bold">Total Score</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
