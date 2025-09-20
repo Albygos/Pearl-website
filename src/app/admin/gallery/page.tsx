@@ -37,6 +37,9 @@ import { Upload, Loader, Trash2 } from 'lucide-react';
 import { getUnits } from '@/lib/services/units';
 import { getGalleryImages, addGalleryImage, deleteGalleryImage } from '@/lib/services/gallery';
 import type { Unit, GalleryImage } from '@/lib/types';
+import { storage } from '@/lib/firebase';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function ManageGalleryPage() {
   const [units, setUnits] = useState<Unit[]>([]);
@@ -70,23 +73,19 @@ export default function ManageGalleryPage() {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedFile(file);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
       setPreviewUrl(URL.createObjectURL(file));
-      // Prefill alt text with filename without extension
       setAltText(file.name.split('.').slice(0, -1).join('.').replace(/[-_]/g, ' '));
     }
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = error => reject(error);
-    });
-  };
-
   const resetForm = () => {
       setSelectedFile(null);
+      if(previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
       setPreviewUrl(null);
       setAltText('');
       setAiHint('');
@@ -107,9 +106,17 @@ export default function ManageGalleryPage() {
 
     setUploading(true);
     try {
-        const base64String = await fileToBase64(selectedFile);
+        const fileId = uuidv4();
+        const fileExtension = selectedFile.name.split('.').pop();
+        const storagePath = `gallery/${fileId}.${fileExtension}`;
+        const imageRef = storageRef(storage, storagePath);
+
+        await uploadBytes(imageRef, selectedFile);
+        const downloadUrl = await getDownloadURL(imageRef);
+
         const newImage: Omit<GalleryImage, 'id'> = {
-            src: base64String,
+            src: downloadUrl,
+            storagePath: storagePath,
             alt: altText,
             aiHint: aiHint,
         }
@@ -120,16 +127,10 @@ export default function ManageGalleryPage() {
         
         const newImageId = await addGalleryImage(newImage);
         
-        // Construct the full new image object for local state update
         const newImageForState: GalleryImage = {
           id: newImageId,
-          src: newImage.src,
-          alt: newImage.alt,
-          aiHint: newImage.aiHint,
+          ...newImage
         };
-        if (newImage.unitId) {
-          newImageForState.unitId = newImage.unitId;
-        }
         
         setGalleryImages([newImageForState, ...galleryImages]);
 
@@ -151,10 +152,10 @@ export default function ManageGalleryPage() {
     }
   };
 
-  const handleDeleteImage = async (imageId: string) => {
+  const handleDeleteImage = async (image: GalleryImage) => {
     try {
-      await deleteGalleryImage(imageId);
-      setGalleryImages(galleryImages.filter(img => img.id !== imageId));
+      await deleteGalleryImage(image);
+      setGalleryImages(galleryImages.filter(img => img.id !== image.id));
       toast({
         title: 'Image Deleted',
         description: 'The image has been successfully removed.',
@@ -199,7 +200,7 @@ export default function ManageGalleryPage() {
               </div>
                <div className="grid gap-2">
                 <Label htmlFor="ai-hint">AI Hint</Label>
-                <Input id="ai-hint" placeholder="e.g. 'abstract painting'" value={aiHint} onChange={(e) => setAiHint(e.target.value)} />
+                <Input id="ai-hint" placeholder="e.g. 'abstract painting'" value={aiHint} onChange={(e) => setAiHint(e.g. value)} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="unit-select">Assign to Unit (Optional)</Label>
@@ -252,7 +253,7 @@ export default function ManageGalleryPage() {
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                      <AlertDialogAction onClick={() => handleDeleteImage(image.id)}>Delete</AlertDialogAction>
+                                      <AlertDialogAction onClick={() => handleDeleteImage(image)}>Delete</AlertDialogAction>
                                     </AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>

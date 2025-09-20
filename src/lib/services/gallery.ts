@@ -1,12 +1,13 @@
-import { database } from '@/lib/firebase';
-import { ref, get, child, push, set, remove } from 'firebase/database';
+import { database, storage } from '@/lib/firebase';
+import { ref as dbRef, get, child, push, set, remove } from 'firebase/database';
+import { ref as storageRef, deleteObject } from 'firebase/storage';
 import type { GalleryImage } from '@/lib/types';
 
-const dbRef = ref(database);
+const databaseRef = dbRef(database);
 
 export async function getGalleryImages(): Promise<GalleryImage[]> {
   try {
-    const snapshot = await get(child(dbRef, 'galleryImages'));
+    const snapshot = await get(child(databaseRef, 'galleryImages'));
     if (snapshot.exists()) {
       const imagesData = snapshot.val();
       return Object.keys(imagesData).map(key => ({
@@ -25,7 +26,7 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
 
 export async function addGalleryImage(image: Omit<GalleryImage, 'id'>): Promise<string> {
   try {
-    const galleryRef = child(dbRef, 'galleryImages');
+    const galleryRef = child(databaseRef, 'galleryImages');
     const newImageRef = push(galleryRef);
     await set(newImageRef, image);
     if (!newImageRef.key) throw new Error("Failed to get new image key");
@@ -36,10 +37,16 @@ export async function addGalleryImage(image: Omit<GalleryImage, 'id'>): Promise<
   }
 }
 
-export async function deleteGalleryImage(id: string): Promise<void> {
+export async function deleteGalleryImage(image: GalleryImage): Promise<void> {
     try {
-        const imageRef = child(dbRef, `galleryImages/${id}`);
-        await remove(imageRef);
+        // Delete from Realtime Database
+        const imageDbRef = child(databaseRef, `galleryImages/${image.id}`);
+        await remove(imageDbRef);
+
+        // Delete from Firebase Storage
+        const imageStorageRef = storageRef(storage, image.storagePath);
+        await deleteObject(imageStorageRef);
+
     } catch (error) {
         console.error("Error deleting gallery image: ", error);
         throw error;
