@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Crown, Trophy, Award, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { getUnits } from '@/lib/services/units';
 import { getEvents } from '@/lib/services/events';
 import type { Unit, AppEvent } from '@/lib/types';
@@ -14,19 +14,6 @@ import { Input } from '@/components/ui/input';
 const getTotalScore = (unit: Unit) => {
   if (!unit.events) return 0;
   return unit.events.reduce((total, event) => total + event.score, 0);
-};
-
-const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 1:
-        return <Crown className="w-6 h-6 text-yellow-500" />;
-      case 2:
-        return <Trophy className="w-6 h-6 text-slate-400" />;
-      case 3:
-        return <Award className="w-6 h-6 text-orange-400" />;
-      default:
-        return <span className="text-lg font-bold text-muted-foreground">{rank}</span>;
-    }
 };
 
 export default function Home() {
@@ -70,7 +57,7 @@ export default function Home() {
         </section>
 
         <div className="max-w-6xl mx-auto">
-          <Card className="shadow-lg border-none overflow-hidden rounded-xl">
+          <Card className="shadow-lg border-2 border-primary/10 overflow-hidden rounded-xl">
             <CardHeader className="text-center bg-muted/30 p-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
                 <div>
                     <CardTitle className="text-3xl font-headline">Live Scoreboard</CardTitle>
@@ -82,7 +69,7 @@ export default function Home() {
                         placeholder="Search megalas..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 bg-background/50"
+                        className="pl-10 bg-background/50 focus:ring-accent"
                     />
                 </div>
             </CardHeader>
@@ -111,20 +98,19 @@ export default function Home() {
                     {filteredUnits.map((unit, index) => (
                       <TableRow 
                         key={unit.id} 
-                        className={`text-base transition-colors duration-200 ${index < 3 ? 'font-bold' : 'font-medium'}`}
+                        className="text-base font-medium animate-in"
+                        style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
                       >
-                        <TableCell className="font-bold text-center">
-                          <div className="flex items-center justify-center h-full">
-                            {getRankIcon(index + 1)}
-                          </div>
+                        <TableCell className="font-bold text-center text-xl text-primary">
+                            {index + 1}
                         </TableCell>
-                        <TableCell>{unit.name}</TableCell>
+                        <TableCell className="font-semibold">{unit.name}</TableCell>
                         {events.map(event => (
                           <TableCell key={event.id} className="text-center text-muted-foreground">
                             {unit.events?.find(e => e.name === event.name)?.score ?? 0}
                           </TableCell>
                         ))}
-                        <TableCell className="text-right text-primary text-xl font-bold">{getTotalScore(unit)}</TableCell>
+                        <TableCell className="text-right text-primary text-2xl font-bold">{getTotalScore(unit)}</TableCell>
                       </TableRow>
                     ))}
                     {filteredUnits.length === 0 && !loading && (
