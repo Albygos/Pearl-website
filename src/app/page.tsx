@@ -41,7 +41,7 @@ export default function Home() {
               const newHighlights: Record<string, boolean> = {};
               unitsArray.forEach(unit => {
                 const prevUnit = prevUnitsRef.current.find(u => u.id === unit.id);
-                if (prevUnit && unit.events) {
+                if (prevUnit && unit.events && prevUnit.events) {
                   unit.events.forEach(eventScore => {
                     const prevEventScore = prevUnit.events.find(e => e.name === eventScore.name);
                     if (!prevEventScore || prevEventScore.score !== eventScore.score) {
@@ -151,7 +151,7 @@ export default function Home() {
                       {events.map(event => (
                         <TableHead key={event.id} className="text-center font-bold text-foreground px-2 sm:px-4">{event.name}</TableHead>
                       ))}
-                      <TableHead className="text-right font-bold text-primary px-2 sm:px-4">Total Score</TableHead>
+                      <TableHead className="text-right font-bold text-foreground px-2 sm:px-4">Total Score</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
