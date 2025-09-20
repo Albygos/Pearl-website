@@ -12,11 +12,11 @@
     --popover-foreground: 240 10% 3.9%;
     --primary: 0 84% 60%; /* Red */
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 5% 96%; /* Adjusted secondary */
+    --secondary: 240 5% 96%;
     --secondary-foreground: 240 10% 3.9%;
     --muted: 240 5% 96%;
     --muted-foreground: 240 4% 46%;
-    --accent: 48 96% 58%; /* Yellow */
+    --accent: 240 5% 96%;
     --accent-foreground: 240 10% 3.9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -44,8 +44,8 @@
     --secondary-foreground: 0 0% 98%;
     --muted: 240 4% 16%;
     --muted-foreground: 240 5% 65%;
-    --accent: 48 96% 58%; /* Yellow */
-    --accent-foreground: 240 10% 3.9%;
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 4% 16%;
