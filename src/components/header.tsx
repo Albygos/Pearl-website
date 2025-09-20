@@ -184,8 +184,8 @@ export default function Header() {
               </DropdownMenu>
             )
           ) : isUnitLoggedIn ? (
-            <Button variant="outline" onClick={handleUnitSignOut}>
-              Sign Out
+            <Button variant="outline" size="icon" onClick={handleUnitSignOut}>
+              <LogOut />
             </Button>
           ) : (
              pathname !== '/login' && !pathname.startsWith('/admin') && (
