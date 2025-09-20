@@ -185,8 +185,8 @@ export default function DashboardPage() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {unit.events && unit.events.map((event) => (
-                            <TableRow key={event.name}>
+                        {unit.events && unit.events.map((event, index) => (
+                            <TableRow key={`${event.name}-${index}`}>
                                 <TableCell className="font-medium">{event.name}</TableCell>
                                 <TableCell className="text-right font-bold text-primary">{event.score}</TableCell>
                             </TableRow>
