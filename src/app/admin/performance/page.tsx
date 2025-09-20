@@ -1,23 +1,12 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import type { Unit } from '@/lib/types';
-import { summarizeUnitPerformance } from '@/ai/flows/summarize-unit-performance';
-import { useToast } from '@/hooks/use-toast';
-import { Wand2, Loader, BarChart, Eye, Star, Search } from 'lucide-react';
+import { BarChart, Eye, Star, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getUnits } from '@/lib/services/units';
-
-type Summaries = {
-  [unitId: string]: string;
-};
-
-type LoadingStates = {
-  [unitId: string]: boolean;
-};
 
 const getTotalScore = (unit: Unit) => {
   if (!unit.events) return 0;
@@ -27,10 +16,7 @@ const getTotalScore = (unit: Unit) => {
 export default function PerformancePage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
-  const [summaries, setSummaries] = useState<Summaries>({});
-  const [loadingStates, setLoadingStates] = useState<LoadingStates>({});
   const [searchTerm, setSearchTerm] = useState('');
-  const { toast } = useToast();
 
    useEffect(() => {
     async function fetchUnits() {
@@ -48,34 +34,13 @@ export default function PerformancePage() {
     );
   }, [units, searchTerm]);
 
-  const handleGenerateSummary = async (unit: Unit) => {
-    setLoadingStates(prev => ({ ...prev, [unit.id]: true }));
-    try {
-      const result = await summarizeUnitPerformance({
-        unitName: unit.name,
-        score: getTotalScore(unit),
-        photoAccessCount: unit.photoAccessCount,
-      });
-      setSummaries(prev => ({ ...prev, [unit.id]: result.summary }));
-    } catch (error) {
-      console.error(error);
-      toast({
-        title: 'Error Generating Summary',
-        description: 'Could not generate a summary. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingStates(prev => ({ ...prev, [unit.id]: false }));
-    }
-  };
-
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <header className="mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-3xl md:text-4xl font-headline font-bold">Megala Performance</h1>
           <p className="text-muted-foreground">
-            Generate AI-powered performance summaries for each megala.
+            View performance metrics for each megala.
           </p>
         </div>
         <div className="relative w-full sm:max-w-xs">
@@ -99,15 +64,7 @@ export default function PerformancePage() {
                 <CardContent className="flex-grow space-y-4">
                   <Skeleton className="h-10 w-full" />
                   <Skeleton className="h-10 w-full" />
-                   <div className="space-y-2 pt-2">
-                     <Skeleton className="h-5 w-1/3" />
-                     <Skeleton className="h-4 w-full" />
-                     <Skeleton className="h-4 w-4/5" />
-                   </div>
                 </CardContent>
-                <CardFooter>
-                   <Skeleton className="h-10 w-full" />
-                </CardFooter>
               </Card>
             ))}
           </div>
@@ -136,39 +93,7 @@ export default function PerformancePage() {
                 </div>
                 <span className="font-bold text-lg">{unit.photoAccessCount}</span>
               </div>
-              <div className="space-y-2 pt-2">
-                <h4 className="font-semibold">AI Performance Summary</h4>
-                {loadingStates[unit.id] ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                  </div>
-                ) : summaries[unit.id] ? (
-                  <p className="text-sm text-muted-foreground italic">
-                    "{summaries[unit.id]}"
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Click the button below to generate a summary.
-                  </p>
-                )}
-              </div>
             </CardContent>
-            <CardFooter>
-              <Button
-                className="w-full"
-                onClick={() => handleGenerateSummary(unit)}
-                disabled={loadingStates[unit.id]}
-              >
-                {loadingStates[unit.id] ? (
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Wand2 className="mr-2 h-4 w-4" />
-                )}
-                Generate Summary
-              </Button>
-            </CardFooter>
           </Card>
         ))}
          {filteredUnits.length === 0 && (
