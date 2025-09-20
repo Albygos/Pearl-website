@@ -112,7 +112,7 @@ export default function Home() {
         <section className="text-center mb-12 animate-in" style={{ animationDelay: '100ms', animationFillMode: 'backwards' }}>
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-headline font-extrabold mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-yellow-500">Pearl 2025</h1>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto animate-in" style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}>
-            Welcome to the heart of creativity! Witness the scores unfold in real-time and celebrate the spirit of art.
+            Let Talent Speak.
           </p>
         </section>
 
