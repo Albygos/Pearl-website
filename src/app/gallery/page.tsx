@@ -46,7 +46,7 @@ export default function GalleryPage() {
           <Skeleton className="h-10 w-3/4 mx-auto mb-4" />
           <Skeleton className="h-6 w-1/2 mx-auto" />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
           {[...Array(8)].map((_, i) => (
              <div key={i} className="aspect-w-1 aspect-h-1">
                 <Skeleton className="w-full h-full rounded-lg" />
@@ -68,7 +68,7 @@ export default function GalleryPage() {
         </div>
 
         {galleryImages.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
             {galleryImages.map((image, index) => (
               <div key={image.id} className="group relative aspect-w-1 aspect-h-1 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 animate-in" style={{ animationDelay: `${index * 75}ms`, animationFillMode: 'backwards' }}>
                 <Image
