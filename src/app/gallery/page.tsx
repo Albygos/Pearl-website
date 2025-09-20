@@ -8,10 +8,18 @@ import { getGalleryImages } from '@/lib/services/gallery';
 import type { GalleryImage } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { incrementUnitPhotoAccessCount } from '@/lib/services/units';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function GalleryPage() {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -68,23 +76,49 @@ export default function GalleryPage() {
         </div>
 
         {galleryImages.length > 0 ? (
-          <div className="grid grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-            {galleryImages.map((image, index) => (
-              <div key={image.id} className="group relative aspect-w-1 aspect-h-1 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 animate-in" style={{ animationDelay: `${index * 75}ms`, animationFillMode: 'backwards' }}>
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  fill
-                  className="object-cover w-full h-full transform transition-transform duration-300 group-hover:scale-110"
-                  data-ai-hint={image.aiHint}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                  <p className="text-white text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{image.alt}</p>
+          <>
+            <div className="grid grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+              {galleryImages.map((image, index) => (
+                <div 
+                  key={image.id} 
+                  className="group relative aspect-w-1 aspect-h-1 overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 animate-in cursor-pointer" 
+                  style={{ animationDelay: `${index * 75}ms`, animationFillMode: 'backwards' }}
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    className="object-cover w-full h-full transform transition-transform duration-300 group-hover:scale-110"
+                    data-ai-hint={image.aiHint}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                    <p className="text-white text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{image.alt}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+
+            <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+              <DialogContent className="max-w-4xl w-full p-0 border-0 bg-transparent shadow-none">
+                {selectedImage && (
+                  <div className="relative">
+                    <Image
+                      src={selectedImage.src}
+                      alt={selectedImage.alt}
+                      width={1200}
+                      height={800}
+                      className="w-full h-auto object-contain rounded-lg"
+                    />
+                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 rounded-b-lg">
+                        <p className="text-white text-lg font-semibold">{selectedImage.alt}</p>
+                     </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+          </>
         ) : (
           <div className="text-center py-24 border-2 border-dashed rounded-lg">
             <p className="text-muted-foreground text-xl">The gallery is currently empty.</p>
