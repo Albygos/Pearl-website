@@ -104,6 +104,10 @@ export default function GalleryPage() {
               <DialogContent className="max-w-4xl w-full p-0 border-0 bg-transparent shadow-none">
                 {selectedImage && (
                   <div className="relative">
+                     <DialogHeader className="sr-only">
+                        <DialogTitle>{selectedImage.alt}</DialogTitle>
+                        <DialogDescription>A larger view of the selected gallery image.</DialogDescription>
+                    </DialogHeader>
                     <Image
                       src={selectedImage.src}
                       alt={selectedImage.alt}
