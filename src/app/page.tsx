@@ -113,31 +113,31 @@ export default function Home() {
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent text-xs uppercase tracking-wider">
-                      <TableHead className="w-24 text-center font-bold text-foreground">Rank</TableHead>
-                      <TableHead className="font-bold text-foreground">Megala Name</TableHead>
+                      <TableHead className="w-16 text-center font-bold text-foreground px-2 sm:px-4">Rank</TableHead>
+                      <TableHead className="font-bold text-foreground min-w-[120px] px-2 sm:px-4">Megala Name</TableHead>
                       {events.map(event => (
-                        <TableHead key={event.id} className="text-center font-bold text-foreground">{event.name}</TableHead>
+                        <TableHead key={event.id} className="text-center font-bold text-foreground px-2 sm:px-4">{event.name}</TableHead>
                       ))}
-                      <TableHead className="text-right text-base font-bold text-primary">Total Score</TableHead>
+                      <TableHead className="text-right text-base font-bold text-primary px-2 sm:px-4">Total Score</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredUnits.map((unit, index) => (
                       <TableRow 
                         key={unit.id} 
-                        className="text-base font-medium animate-in"
+                        className="font-medium animate-in"
                         style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
                       >
-                        <TableCell className="font-bold text-center text-xl text-primary">
+                        <TableCell className="font-bold text-center text-lg sm:text-xl text-primary px-2 sm:px-4">
                             {index + 1}
                         </TableCell>
-                        <TableCell className="font-semibold">{unit.name}</TableCell>
+                        <TableCell className="font-semibold text-sm sm:text-base px-2 sm:px-4">{unit.name}</TableCell>
                         {events.map(event => (
-                          <TableCell key={event.id} className="text-center text-foreground font-bold">
+                          <TableCell key={event.id} className="text-center text-foreground font-bold text-sm sm:text-base px-2 sm:px-4">
                             {unit.events?.find(e => e.name === event.name)?.score ?? 0}
                           </TableCell>
                         ))}
-                        <TableCell className="text-right text-primary text-2xl font-bold">{getTotalScore(unit)}</TableCell>
+                        <TableCell className="text-right text-primary text-xl sm:text-2xl font-bold px-2 sm:px-4">{getTotalScore(unit)}</TableCell>
                       </TableRow>
                     ))}
                     {filteredUnits.length === 0 && !loading && (
