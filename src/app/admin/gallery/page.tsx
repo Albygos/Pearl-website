@@ -119,17 +119,15 @@ export default function ManageGalleryPage() {
             storagePath: storagePath,
             alt: altText,
             aiHint: aiHint,
-        }
-
-        if (selectedUnitId && selectedUnitId !== 'none') {
-            newImage.unitId = selectedUnitId;
-        }
+            ...(selectedUnitId && selectedUnitId !== 'none' && { unitId: selectedUnitId }),
+        };
         
         const newImageId = await addGalleryImage(newImage);
         
         const newImageForState: GalleryImage = {
           id: newImageId,
-          ...newImage
+          ...newImage,
+          ...(newImage.unitId && {unitId: newImage.unitId})
         };
         
         setGalleryImages([newImageForState, ...galleryImages]);
