@@ -1,6 +1,5 @@
-import { database, storage } from '@/lib/firebase';
+import { database } from '@/lib/firebase';
 import { ref as dbRef, get, child, push, set, remove } from 'firebase/database';
-import { ref as storageRef, deleteObject } from 'firebase/storage';
 import type { GalleryImage } from '@/lib/types';
 
 const databaseRef = dbRef(database);
@@ -42,11 +41,6 @@ export async function deleteGalleryImage(image: GalleryImage): Promise<void> {
         // Delete from Realtime Database
         const imageDbRef = child(databaseRef, `galleryImages/${image.id}`);
         await remove(imageDbRef);
-
-        // Delete from Firebase Storage
-        const imageStorageRef = storageRef(storage, image.storagePath);
-        await deleteObject(imageStorageRef);
-
     } catch (error) {
         console.error("Error deleting gallery image: ", error);
         throw error;

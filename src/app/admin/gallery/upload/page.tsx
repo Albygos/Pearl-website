@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -27,9 +27,6 @@ import { Upload, Loader } from 'lucide-react';
 import { getUnits } from '@/lib/services/units';
 import { addGalleryImage } from '@/lib/services/gallery';
 import type { Unit, GalleryImage } from '@/lib/types';
-import { storage } from '@/lib/firebase';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
 
 export default function UploadGalleryPage() {
   const [units, setUnits] = useState<Unit[]>([]);
@@ -67,6 +64,15 @@ export default function UploadGalleryPage() {
     }
   };
 
+  const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleUpload = async () => {
     if (!selectedFile || !altText) {
         toast({
@@ -79,17 +85,10 @@ export default function UploadGalleryPage() {
 
     setUploading(true);
     try {
-        const fileId = uuidv4();
-        const fileExtension = selectedFile.name.split('.').pop();
-        const storagePath = `gallery/${fileId}.${fileExtension}`;
-        const imageRef = storageRef(storage, storagePath);
-
-        await uploadBytes(imageRef, selectedFile);
-        const downloadUrl = await getDownloadURL(imageRef);
+        const dataUrl = await fileToDataUrl(selectedFile);
 
         const newImage: Omit<GalleryImage, 'id'> = {
-            src: downloadUrl,
-            storagePath: storagePath,
+            src: dataUrl,
             alt: altText,
             aiHint: aiHint,
             ...(selectedUnitId && selectedUnitId !== 'none' && { unitId: selectedUnitId }),
