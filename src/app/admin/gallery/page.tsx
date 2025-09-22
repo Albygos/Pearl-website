@@ -200,7 +200,7 @@ export default function ManageGalleryPage() {
               </div>
                <div className="grid gap-2">
                 <Label htmlFor="ai-hint">AI Hint</Label>
-                <Input id="ai-hint" placeholder="e.g. 'abstract painting'" value={aiHint} onChange={(e) => setAiHint(e.g. value)} />
+                <Input id="ai-hint" placeholder="e.g. 'abstract painting'" value={aiHint} onChange={(e) => setAiHint(e.target.value)} />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="unit-select">Assign to Unit (Optional)</Label>

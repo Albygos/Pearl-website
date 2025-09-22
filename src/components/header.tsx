@@ -197,6 +197,7 @@ export default function Header() {
           )}
           
           <div className="md:hidden">
+           {!isAdminPage && (
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -211,46 +212,12 @@ export default function Header() {
                 </SheetHeader>
                 <div className="flex flex-col gap-4 pt-8">
                   <nav className="flex flex-col gap-4">
-                    {isAdminPage ? (
-                      <>
-                        <p className="text-sm font-medium text-muted-foreground px-2">Site</p>
-                        <MobileMainNav isUnitLoggedIn={isUnitLoggedIn} pathname={pathname} />
-                        <hr />
-                        {isAdminLoggedIn && (
-                          <>
-                          <p className="text-sm font-medium text-muted-foreground px-2 pt-2">Admin</p>
-                          {adminNavLinks.map((link) => (
-                            <Link
-                              key={link.href}
-                              href={link.href}
-                              className={cn(
-                                'text-lg font-medium flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-accent',
-                                pathname === link.href
-                                  ? 'bg-accent text-primary'
-                                  : ''
-                              )}
-                            >
-                              <link.icon className="h-5 w-5" />
-                              {link.label}
-                            </Link>
-                          ))}
-                           <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={handleAdminSignOut} className="text-lg font-medium">
-                                <LogOut className="mr-3 h-5 w-5" />
-                                <span>Sign Out</span>
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <MobileMainNav isUnitLoggedIn={isUnitLoggedIn} pathname={pathname} />
-                      </>
-                    )}
+                    <MobileMainNav isUnitLoggedIn={isUnitLoggedIn} pathname={pathname} />
                   </nav>
                 </div>
               </SheetContent>
             </Sheet>
+           )}
           </div>
         </div>
       </div>
