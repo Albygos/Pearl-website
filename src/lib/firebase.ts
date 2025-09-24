@@ -6,16 +6,15 @@ import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-};
-
+    apiKey: "AIzaSyBzyND_2SL5D4xAvOt2XyJVyY-tBJiRucM",
+    authDomain: "kcym-malsaram.firebaseapp.com",
+    databaseURL: "https://kcym-malsaram-default-rtdb.firebaseio.com",
+    projectId: "kcym-malsaram",
+    storageBucket: "kcym-malsaram.firebasestorage.app",
+    messagingSenderId: "874679083400",
+    appId: "1:874679083400:web:7b066cfe16d0906ea91a3d",
+    measurementId: "G-5ZJZE0REZ5"
+  };
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const database = getDatabase(app);
