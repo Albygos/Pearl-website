@@ -3,27 +3,33 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Building, Paintbrush } from 'lucide-react';
-import { getVenueDetails } from '@/lib/services/venue';
+import { Building, Paintbrush, Clock } from 'lucide-react';
+import { getLatestVenueDetails } from '@/lib/services/venue';
 import type { VenueDetails } from '@/lib/types';
+import { database } from '@/lib/firebase';
+import { ref, onValue } from 'firebase/database';
 
 export default function VenuePage() {
   const [details, setDetails] = useState<VenueDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchDetails() {
-      setLoading(true);
-      try {
-        const currentDetails = await getVenueDetails();
-        setDetails(currentDetails);
-      } catch (error) {
-        console.error("Failed to fetch venue details:", error);
-      } finally {
+    setLoading(true);
+    const venueRef = ref(database, 'venue');
+    const unsubscribe = onValue(venueRef, (snapshot) => {
+        if(snapshot.exists()) {
+            const allEntries = snapshot.val();
+            const sortedEntries = Object.keys(allEntries)
+                .map(key => ({ id: key, ...allEntries[key] }))
+                .sort((a, b) => b.timestamp - a.timestamp);
+            setDetails(sortedEntries[0] || null);
+        } else {
+            setDetails(null);
+        }
         setLoading(false);
-      }
-    }
-    fetchDetails();
+    });
+
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -34,7 +40,7 @@ export default function VenuePage() {
             Event Venue
           </h1>
           <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
-            Find out what's happening and where.
+            Find out what's happening and where, live.
           </p>
         </section>
 
@@ -43,7 +49,7 @@ export default function VenuePage() {
             <CardTitle className="text-3xl font-headline text-center">Current Location</CardTitle>
             <CardDescription className="text-center">This is where the main event is currently taking place.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-8 text-center">
+          <CardContent className="space-y-8 text-center p-6">
             {loading ? (
               <>
                 <div className="flex flex-col items-center gap-2">
@@ -70,6 +76,10 @@ export default function VenuePage() {
                     Item / Event
                   </h3>
                   <p className="text-4xl font-bold">{details.item}</p>
+                </div>
+                <div className="text-sm text-muted-foreground flex items-center justify-center gap-2 pt-4 border-t">
+                    <Clock className="h-4 w-4" />
+                    <span>Last updated: {new Date(details.timestamp).toLocaleString()}</span>
                 </div>
               </>
             ) : (

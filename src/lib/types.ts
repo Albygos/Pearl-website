@@ -25,6 +25,8 @@ export type AppEvent = {
 };
 
 export type VenueDetails = {
+  id: string;
   roomNumber: string;
   item: string;
+  timestamp: number;
 };
