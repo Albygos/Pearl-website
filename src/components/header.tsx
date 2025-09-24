@@ -33,6 +33,7 @@ import {
   CalendarPlus,
   GalleryHorizontal,
   LayoutDashboard,
+  Building,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -42,6 +43,7 @@ const MainNav = ({ isUnitLoggedIn, pathname }: { isUnitLoggedIn: boolean, pathna
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/gallery', label: 'Gallery' },
+    { href: '/venue', label: 'Venue' },
     { href: isUnitLoggedIn ? '/dashboard' : '/login', label: 'My Dashboard' },
   ];
 
@@ -68,6 +70,7 @@ const MobileMainNav = ({ isUnitLoggedIn, pathname }: { isUnitLoggedIn: boolean, 
    const navLinks = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/gallery', label: 'Gallery', icon: GalleryHorizontal },
+    { href: '/venue', label: 'Venue', icon: Building },
     { href: isUnitLoggedIn ? '/dashboard' : '/login', label: 'My Dashboard', icon: LayoutDashboard },
   ];
 
@@ -98,6 +101,7 @@ const adminNavLinks = [
   { href: '/admin/scores', label: 'Manage Scores', icon: Star },
   { href: '/admin/gallery', label: 'Manage Gallery', icon: ImageIcon },
   { href: '/admin/performance', label: 'Performance', icon: BarChart },
+  { href: '/admin/venue', label: 'Manage Venue', icon: Building },
 ];
 
 export default function Header() {

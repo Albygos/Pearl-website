@@ -12,7 +12,7 @@ export type Unit = {
 };
 
 export type GalleryImage = {
-  id: string;
+  id:string;
   src: string;
   alt: string;
   unitId?: string;
@@ -22,4 +22,9 @@ export type GalleryImage = {
 export type AppEvent = {
   id: string;
   name: string;
+};
+
+export type VenueDetails = {
+  roomNumber: string;
+  item: string;
 };

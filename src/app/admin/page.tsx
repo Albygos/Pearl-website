@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Star, Users, ImageIcon, ArrowRight } from 'lucide-react';
+import { Star, Users, ImageIcon, ArrowRight, Building } from 'lucide-react';
 import { getUnits } from '@/lib/services/units';
 import { getGalleryImages } from '@/lib/services/gallery';
 import { unstable_noStore as noStore } from 'next/cache';
@@ -119,6 +119,17 @@ export default async function AdminDashboardPage() {
           <CardContent>
             <Button asChild>
               <Link href="/admin/events">Go to Events <ArrowRight className="ml-2" /></Link>
+            </Button>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader>
+            <CardTitle>Manage Venue</CardTitle>
+            <CardDescription>Update the event venue information.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/admin/venue">Go to Venue <ArrowRight className="ml-2" /></Link>
             </Button>
           </CardContent>
         </Card>
