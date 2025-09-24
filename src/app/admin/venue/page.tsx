@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -176,10 +177,9 @@ export default function ManageVenuePage() {
   }
 
   const handleDownloadCsv = () => {
-    const headers = ['Timestamp', 'Room Number', 'Item/Event'];
+    const headers = ['Room Number', 'Item/Event'];
     const rows = details.map(d => 
         [
-            new Date(d.timestamp).toLocaleString(),
             `"${d.roomNumber}"`,
             `"${d.item}"`
         ].join(',')
@@ -367,3 +367,5 @@ export default function ManageVenuePage() {
     </div>
   );
 }
+
+    
