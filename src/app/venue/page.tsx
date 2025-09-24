@@ -15,18 +15,24 @@ export default function VenuePage() {
 
   useEffect(() => {
     setLoading(true);
+    // Use getLatestVenueDetails which handles the sorting and gets the most recent one.
     const venueRef = ref(database, 'venue');
-    const unsubscribe = onValue(venueRef, (snapshot) => {
-        if(snapshot.exists()) {
-            const allEntries = snapshot.val();
-            const sortedEntries = Object.keys(allEntries)
-                .map(key => ({ id: key, ...allEntries[key] }))
-                .sort((a, b) => b.timestamp - a.timestamp);
-            setDetails(sortedEntries[0] || null);
-        } else {
-            setDetails(null);
-        }
+    const unsubscribe = onValue(venueRef, async () => {
+      try {
+        const latestDetails = await getLatestVenueDetails();
+        setDetails(latestDetails);
+      } catch (error) {
+        console.error("Failed to fetch latest venue details:", error);
+        setDetails(null);
+      } finally {
         setLoading(false);
+      }
+    });
+
+    // Initial fetch
+    getLatestVenueDetails().then(latestDetails => {
+      setDetails(latestDetails);
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -47,7 +53,6 @@ export default function VenuePage() {
         <Card className="w-full max-w-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border-2 border-primary/10 rounded-xl animate-in" style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}>
           <CardHeader>
             <CardTitle className="text-3xl font-headline text-center">Current Location</CardTitle>
-            <CardDescription className="text-center">This is where the main event is currently taking place.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-8 text-center p-6">
             {loading ? (

@@ -13,13 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader, Plus, Trash2, Edit, Download } from 'lucide-react';
-import type { VenueDetails } from '@/lib/types';
+import type { VenueDetails, AppEvent } from '@/lib/types';
 import {
   getVenueDetails,
   addVenueDetails,
   updateVenueDetails,
   deleteVenueDetails,
 } from '@/lib/services/venue';
+import { getEvents } from '@/lib/services/events';
 import {
   Table,
   TableBody,
@@ -49,9 +50,11 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function ManageVenuePage() {
   const [details, setDetails] = useState<VenueDetails[]>([]);
+  const [events, setEvents] = useState<AppEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -68,8 +71,12 @@ export default function ManageVenuePage() {
   const fetchDetails = async () => {
     setLoading(true);
     try {
-      const currentDetails = await getVenueDetails();
+      const [currentDetails, currentEvents] = await Promise.all([
+        getVenueDetails(),
+        getEvents(),
+      ]);
       setDetails(currentDetails);
+      setEvents(currentEvents);
     } catch (error) {
       toast({
         title: 'Error',
@@ -222,7 +229,16 @@ export default function ManageVenuePage() {
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="new-item" className="text-right">Item/Event</Label>
-                            <Input id="new-item" value={newItem} onChange={(e) => setNewItem(e.target.value)} className="col-span-3" placeholder="e.g., 'Live Painting'"/>
+                            <Select onValueChange={setNewItem} value={newItem}>
+                              <SelectTrigger id="new-item" className="col-span-3">
+                                <SelectValue placeholder="Select an event" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {events.map(event => (
+                                  <SelectItem key={event.id} value={event.name}>{event.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                         </div>
                     </div>
                     <DialogFooter>
@@ -323,7 +339,19 @@ export default function ManageVenuePage() {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="edit-item" className="text-right">Item/Event</Label>
-                <Input id="edit-item" value={editingVenue.item} onChange={(e) => setEditingVenue({...editingVenue, item: e.target.value})} className="col-span-3"/>
+                <Select
+                  onValueChange={(value) => setEditingVenue({ ...editingVenue, item: value })}
+                  value={editingVenue.item}
+                >
+                  <SelectTrigger id="edit-item" className="col-span-3">
+                    <SelectValue placeholder="Select an event" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {events.map(event => (
+                      <SelectItem key={event.id} value={event.name}>{event.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}
